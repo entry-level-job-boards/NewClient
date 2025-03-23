@@ -8,6 +8,7 @@ import { Contact } from './pages/Contact';
 import { PostJob } from './pages/PostJob';
 
 function App() {
+  const isLoading = true; // Simulate loading state
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
