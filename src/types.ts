@@ -8,6 +8,9 @@ export interface Job {
   deadline: string;
   salary: string;
   isRemote: boolean;
+  skills: string[];
+  postedDate: string;
+  expirationDate: string;
 }
 
 export interface ApplicationForm {
