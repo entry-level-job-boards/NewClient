@@ -48,6 +48,7 @@ export const BrowseJobs = () => {
     const [selectedLocationType, setSelectedLocationType] = useState<'all' | 'remote' | 'onsite'>('all');
     const [selectedSalaryRange, setSelectedSalaryRange] = useState(salaryRanges[0]);
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
     // Get unique skills from all jobs
     const allSkills = useMemo(() => {
@@ -55,6 +56,10 @@ export const BrowseJobs = () => {
         sampleJobs.forEach(job => job.skills.forEach(skill => skillsSet.add(skill)));
         return Array.from(skillsSet);
     }, []);
+
+    const handleToggleJob = (jobId: string) => {
+        setExpandedJobId(prev => (prev === jobId ? null : jobId));
+    };
 
     // Filter jobs based on all criteria
     const filteredJobs = useMemo(() => {
@@ -255,7 +260,12 @@ export const BrowseJobs = () => {
             <div className="space-y-4">
                 {filteredJobs.length > 0 ? (
                     filteredJobs.map((job) => (
-                        <JobCard key={job.id} job={job} />
+                        <JobCard
+                            key={job.id}
+                            job={job}
+                            isExpanded={expandedJobId === job.id}
+                            onToggle={handleToggleJob}
+                        />
                     ))
                 ) : (
                     <div className="text-center py-12">

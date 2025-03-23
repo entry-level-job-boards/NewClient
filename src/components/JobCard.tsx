@@ -5,11 +5,11 @@ import { Job } from '../types';
 
 interface JobCardProps {
     job: Job;
+    isExpanded: boolean;
+    onToggle: (jobId: string) => void;
 }
 
-export const JobCard = ({ job }: JobCardProps) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-
+export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
     return (
         <motion.div
             layout
@@ -17,10 +17,7 @@ export const JobCard = ({ job }: JobCardProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
         >
-            <div
-                className="p-6 cursor-pointer"
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
+            <div className="p-6 cursor-pointer" onClick={() => onToggle(job.id)}>
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-xl font-semibold text-gray-900">{job.title}</h3>
@@ -48,9 +45,10 @@ export const JobCard = ({ job }: JobCardProps) => {
                     {isExpanded && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
+                            animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             className="mt-4"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <p className="text-gray-600 mb-4">{job.description}</p>
                             <div className="mb-4">

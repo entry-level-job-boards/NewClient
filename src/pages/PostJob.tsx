@@ -118,23 +118,32 @@ export const PostJob = () => {
                                     </span>
                                 ))}
                             </div>
-                            <form onSubmit={addSkill} className="flex gap-2">
+                            <div className="flex gap-2">
                                 <input
                                     type="text"
                                     value={skillInput}
                                     onChange={(e) => setSkillInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            addSkill(e);
+                                        }
+                                    }}
                                     disabled={skills.length >= 5}
-                                    placeholder={skills.length >= 5 ? "Maximum skills reached" : "Add a skill..."}
+                                    placeholder={
+                                        skills.length >= 5 ? 'Maximum skills reached' : 'Add a skill...'
+                                    }
                                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
                                 <button
-                                    type="submit"
+                                    type="button"
+                                    onClick={addSkill}
                                     disabled={skills.length >= 5 || !skillInput.trim()}
                                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                 >
                                     Add
                                 </button>
-                            </form>
+                            </div>
                         </div>
 
                         <div>
