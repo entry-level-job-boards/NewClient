@@ -5,6 +5,9 @@ export const PostJob = () => {
     const [skills, setSkills] = useState<string[]>([]);
     const [skillInput, setSkillInput] = useState('');
 
+    const [benefits, setBenefits] = useState<string[]>([]);
+    const [benefitInput, setBenefitInput] = useState('');
+
     const addSkill = (e: React.FormEvent) => {
         e.preventDefault();
         if (skillInput.trim() && skills.length < 5) {
@@ -15,6 +18,18 @@ export const PostJob = () => {
 
     const removeSkill = (skillToRemove: string) => {
         setSkills(skills.filter(skill => skill !== skillToRemove));
+    };
+
+    const addBenefit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (benefitInput.trim()) {
+            setBenefits([...benefits, benefitInput.trim()]);
+            setBenefitInput('');
+        }
+    };
+
+    const removeBenefit = (benefitToRemove: string) => {
+        setBenefits(benefits.filter((b) => b !== benefitToRemove));
     };
 
     // Calculate expiration date (1 month from today)
@@ -51,7 +66,7 @@ export const PostJob = () => {
                     <form className="space-y-6">
                         <div>
                             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                                Job Title
+                                Job Title <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -63,7 +78,7 @@ export const PostJob = () => {
 
                         <div>
                             <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                                Company Name
+                                Company Name <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -75,7 +90,7 @@ export const PostJob = () => {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Location
+                                    Location <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -86,7 +101,7 @@ export const PostJob = () => {
                             </div>
                             <div>
                                 <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Salary Range
+                                    Salary Range <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -99,7 +114,7 @@ export const PostJob = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Desired Skills (Maximum 5)
+                                Desired Skills (Maximum 5) <span className="text-red-500">*</span>
                             </label>
                             <div className="mb-2">
                                 {skills.map((skill) => (
@@ -147,26 +162,64 @@ export const PostJob = () => {
                         </div>
 
                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Benefits (No Limit) <span className="text-red-500">*</span>
+                            </label>
+
+                            {/* BENEFIT TAGS */}
+                            <div className="mb-2">
+                                {benefits.map((benefit) => (
+                                    <span
+                                        key={benefit}
+                                        className="inline-flex items-center bg-indigo-50 text-indigo-700 rounded-full px-3 py-1 text-sm mr-2 mb-2"
+                                    >
+                                        {benefit}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeBenefit(benefit)}
+                                            className="ml-1 hover:text-indigo-900"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+
+                            {/* BENEFIT INPUT + ADD BUTTON */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={benefitInput}
+                                    onChange={(e) => setBenefitInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            addBenefit(e);
+                                        }
+                                    }}
+                                    placeholder="Add a benefit..."
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={addBenefit}
+                                    disabled={!benefitInput.trim()}
+                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
                             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                                Job Description
+                                Job Description <span className="text-red-500">*</span>
                             </label>
                             <textarea
                                 id="description"
                                 rows={6}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Describe the role, responsibilities, and what makes it suitable for entry-level candidates..."
-                            ></textarea>
-                        </div>
-
-                        <div>
-                            <label htmlFor="benefits" className="block text-sm font-medium text-gray-700 mb-2">
-                                Benefits
-                            </label>
-                            <textarea
-                                id="benefits"
-                                rows={4}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="List the benefits and perks..."
                             ></textarea>
                         </div>
 

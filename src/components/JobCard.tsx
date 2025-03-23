@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Building, Calendar, DollarSign, ChevronDown, ChevronUp, BadgeCheck } from 'lucide-react';
+import {
+    MapPin,
+    Building,
+    Calendar,
+    DollarSign,
+    ChevronDown,
+    ChevronUp,
+    BadgeCheck,
+} from 'lucide-react';
 import { Job } from '../types';
 
 interface JobCardProps {
@@ -17,18 +25,25 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
         >
-            <div className="p-6 cursor-pointer" onClick={() => onToggle(job.id)}>
-                <div className="flex justify-between items-start">
+            <div
+                className="p-6 cursor-pointer"
+                onClick={() => onToggle(job.id)}
+            >
+                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                     <div>
                         <h3 className="text-xl font-semibold text-gray-900">{job.title}</h3>
-                        <div className="flex items-center mt-2 text-gray-600">
-                            <Building className="h-4 w-4 mr-2" />
-                            <span className="mr-4">{job.company}</span>
-                            <MapPin className="h-4 w-4 mr-2" />
-                            <span>{job.location}</span>
+                        <div className="flex flex-wrap items-center mt-2 text-gray-600 gap-x-4 gap-y-2">
+                            <div className="flex items-center">
+                                <Building className="h-4 w-4 mr-2" />
+                                <span>{job.company}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <MapPin className="h-4 w-4 mr-2" />
+                                <span>{job.location}</span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-start sm:justify-end">
                         <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full flex items-center">
                             <BadgeCheck className="h-4 w-4 mr-1" />
                             No Experience Required
@@ -51,6 +66,7 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <p className="text-gray-600 mb-4">{job.description}</p>
+
                             <div className="mb-4">
                                 <h4 className="font-semibold mb-2">Desired Skills:</h4>
                                 <div className="flex flex-wrap gap-2">
@@ -64,7 +80,8 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                                     ))}
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4 mb-4">
                                 <div className="flex items-center text-gray-600">
                                     <DollarSign className="h-4 w-4 mr-2" />
                                     <span>{job.salary}</span>
@@ -74,6 +91,7 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                                     <span>Apply by {job.deadline}</span>
                                 </div>
                             </div>
+
                             <div className="mb-4">
                                 <h4 className="font-semibold mb-2">Benefits:</h4>
                                 <ul className="list-disc list-inside text-gray-600">
@@ -82,12 +100,13 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                                     ))}
                                 </ul>
                             </div>
+
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     window.location.href = `/apply/${job.id}`;
                                 }}
-                                className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                                className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                             >
                                 Apply Now
                             </button>

@@ -32,6 +32,34 @@ const sampleJobs: Job[] = [
         postedDate: '2024-02-25',
         expirationDate: '2024-03-25'
     },
+    {
+        id: '3',
+        title: 'Marketing Intern',
+        company: 'Creative Minds Agency',
+        location: 'Remote',
+        description: 'Seeking a creative intern to assist with social media campaigns and content creation. No prior experience required.',
+        benefits: ['Remote Work', 'Flexible Schedule', 'Mentorship Program'],
+        deadline: 'May 1, 2024',
+        salary: '$30,000 - $40,000',
+        isRemote: true,
+        skills: ['Social Media', 'Content Creation', 'Graphic Design', 'SEO'],
+        postedDate: '2024-03-01',
+        expirationDate: '2024-04-01'
+    },
+    {
+        id: '4',
+        title: 'Data Analyst Trainee',
+        company: 'DataDriven Inc.',
+        location: 'On-site (San Francisco, CA)',
+        description: 'We are looking for a data analyst trainee to join our analytics team. Training will be provided for the right candidate.',
+        benefits: ['Health Insurance', 'Paid Time Off', 'Training Programs'],
+        deadline: 'June 1, 2024',
+        salary: '$55,000 - $70,000',
+        isRemote: false,
+        skills: ['Excel', 'SQL', 'Data Visualization', 'Python'],
+        postedDate: '2024-03-05',
+        expirationDate: '2024-04-05'
+    },
 ];
 
 const salaryRanges = [

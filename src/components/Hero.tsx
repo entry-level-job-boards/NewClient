@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 export const Hero = () => {
   return (
-    <div className="bg-gradient-to-b from-indigo-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
+    <div className="h-screen bg-gradient-to-b from-indigo-50 via-indigo-100 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
