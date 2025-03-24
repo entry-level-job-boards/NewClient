@@ -128,6 +128,21 @@ export const BrowseJobs = () => {
         );
     };
 
+    const suggestions = useMemo(() => {
+        const query = searchQuery.toLowerCase();
+        if (!query) return [];
+
+        const uniqueSuggestions = new Set<string>();
+
+        sampleJobs.forEach((job) => {
+            if (job.title.toLowerCase().includes(query)) uniqueSuggestions.add(job.title);
+            if (job.company.toLowerCase().includes(query)) uniqueSuggestions.add(job.company);
+            if (job.location.toLowerCase().includes(query)) uniqueSuggestions.add(job.location);
+        });
+
+        return Array.from(uniqueSuggestions).slice(0, 5); // limit to 5 suggestions
+    }, [searchQuery]);
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="mb-8">
@@ -142,6 +157,19 @@ export const BrowseJobs = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
+                        {suggestions.length > 0 && (
+                            <ul className="absolute z-10 bg-white border border-gray-300 rounded-md shadow-md mt-1 w-full max-h-60 overflow-y-auto">
+                                {suggestions.map((item, index) => (
+                                    <li
+                                        key={index}
+                                        onClick={() => setSearchQuery(item)}
+                                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700"
+                                    >
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                     <button
                         onClick={() => setIsFiltersOpen(!isFiltersOpen)}
