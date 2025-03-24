@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Job } from '../types';
 import { JobCard } from '../components/JobCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
@@ -78,6 +78,9 @@ export const BrowseJobs = () => {
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+    const suggestionsRef = useRef<HTMLUListElement | null>(null);
+
     // Get unique skills from all jobs
     const allSkills = useMemo(() => {
         const skillsSet = new Set<string>();
@@ -154,16 +157,43 @@ export const BrowseJobs = () => {
                             type="text"
                             placeholder="Search by title, company, or location..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setActiveSuggestionIndex(-1)
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    setActiveSuggestionIndex((prev) =>
+                                        prev < suggestions.length - 1 ? prev + 1 : 0
+                                    );
+                                } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    setActiveSuggestionIndex((prev) =>
+                                        prev > 0 ? prev - 1 : suggestions.length - 1
+                                    );
+                                } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                                    e.preventDefault();
+                                    setSearchQuery(suggestions[activeSuggestionIndex]);
+                                    setActiveSuggestionIndex(-1);
+                                }
+                            }}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                         {suggestions.length > 0 && (
-                            <ul className="absolute z-10 bg-white border border-gray-300 rounded-md shadow-md mt-1 w-full max-h-60 overflow-y-auto">
+                            <ul
+                                ref={suggestionsRef}
+                                className="absolute z-10 bg-white border border-gray-300 rounded-md shadow-md mt-1 w-full max-h-60 overflow-y-auto"
+                            >
                                 {suggestions.map((item, index) => (
                                     <li
                                         key={index}
-                                        onClick={() => setSearchQuery(item)}
-                                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700"
+                                        onMouseDown={() => {
+                                            setSearchQuery(item);
+                                            setActiveSuggestionIndex(-1);
+                                        }}
+                                        className={`px-4 py-2 cursor-pointer text-sm text-gray-700 ${index === activeSuggestionIndex ? 'bg-indigo-100 text-indigo-800' : 'hover:bg-indigo-50'
+                                            }`}
                                     >
                                         {item}
                                     </li>
