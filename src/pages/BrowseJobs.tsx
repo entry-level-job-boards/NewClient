@@ -123,6 +123,7 @@ export const BrowseJobs = () => {
         });
     }, [searchQuery, selectedLocationType, selectedSalaryRange, selectedSkills]);
 
+    // Toggle adding skills 
     const toggleSkill = (skill: string) => {
         setSelectedSkills(prev =>
             prev.includes(skill)
@@ -131,6 +132,7 @@ export const BrowseJobs = () => {
         );
     };
 
+    // Generate suggestions based on search query and job data
     const suggestions = useMemo(() => {
         const query = searchQuery.toLowerCase();
         if (!query) return [];
