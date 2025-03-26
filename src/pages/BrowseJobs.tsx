@@ -60,6 +60,20 @@ const sampleJobs: Job[] = [
         postedDate: '2024-03-05',
         expirationDate: '2024-04-05'
     },
+    {
+        id: '5',
+        title: 'Junior Graphic Designer',
+        company: 'Artistic Vision Studio',
+        location: 'Remote',
+        description: 'Passionate about design? Join our team as a junior graphic designer and work on exciting projects with our creative team.',
+        benefits: ['Remote Work', 'Flexible Hours', 'Design Software'],
+        deadline: 'June 15, 2024',
+        salary: '$40,000 - $50,000',
+        isRemote: true,
+        skills: ['Adobe Creative Suite', 'Typography', 'Illustration', 'UI/UX Design'],
+        postedDate: '2024-03-10',
+        expirationDate: '2024-04-10'
+    },
 ];
 
 const salaryRanges = [
