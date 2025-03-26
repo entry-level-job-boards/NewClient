@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
