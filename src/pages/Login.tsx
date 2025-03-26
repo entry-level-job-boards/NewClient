@@ -20,7 +20,7 @@ export const Login = () => {
                 <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                 Email address
                             </label>
                             <div className="mt-1 relative">
@@ -33,14 +33,14 @@ export const Login = () => {
                                     type="email"
                                     autoComplete="email"
                                     required
-                                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="appearance-none block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="you@example.com"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                                 Password
                             </label>
                             <div className="mt-1 relative">
@@ -52,7 +52,7 @@ export const Login = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     required
-                                    className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="appearance-none block w-full pl-10 pr-10 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="••••••••"
                                 />
                                 <button
