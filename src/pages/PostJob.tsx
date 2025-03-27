@@ -454,11 +454,11 @@ export const PostJob = () => {
                                     setDescription(text);
                                     setIsDescriptionValid(validateDescription(text));
                                 }}
-                                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${isDescriptionValid
+                                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 whitespace-pre-line ${isDescriptionValid
                                     ? 'border-gray-300 focus:ring-indigo-500'
                                     : 'border-red-500 focus:ring-red-500'
                                     }`}
-                                placeholder="Describe the role, responsibilities, and what makes it suitable for entry-level candidates..."
+                                placeholder="Describe the role and responsibilities. This is about the job, not the company. Please keep it short and simple."
                             ></textarea>
                             {!isDescriptionValid && (
                                 <p className="text-red-500 text-sm mt-1">
