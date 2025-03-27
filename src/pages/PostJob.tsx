@@ -1,25 +1,156 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Info, X } from 'lucide-react';
 
 export const PostJob = () => {
+
+    const [phone, setPhone] = useState('');
+
+    const [contactEmail, setContactEmail] = useState('');
+    const [isEmailValid, setIsEmailValid] = useState(true);
+
     const [skills, setSkills] = useState<string[]>([]);
     const [skillInput, setSkillInput] = useState('');
+    const [isSkillRejected, setIsSkillRejected] = useState(false);
 
     const [benefits, setBenefits] = useState<string[]>([]);
     const [benefitInput, setBenefitInput] = useState('');
 
-    const addSkill = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (skillInput.trim() && skills.length < 5) {
-            setSkills([...skills, skillInput.trim()]);
-            setSkillInput('');
-        }
+    const [description, setDescription] = useState('');
+    const [isDescriptionValid, setIsDescriptionValid] = useState(true);
+
+    const bannedWords = [
+        // General experience-related
+        'experience',
+        'years',
+        'year',
+        'prior',
+        'previous',
+        'proven',
+        'required',
+        'musthaveexperience',
+        'experienced',
+        'background',
+        'expertise',
+        'skilled',
+        'veteran',
+        'trackrecord',
+
+        // Time-based phrases
+        '2years',
+        '3years',
+        '5years',
+        'oneyear',
+        'twoyears',
+        'threeplusyears',
+        'multipleyears',
+        'pastwork',
+
+        // Skill-level gatekeeping
+        'advanced',
+        'senior',
+        'expert',
+        'guru',
+        'highlyskilled',
+        'independent',
+        'selfstarter',
+        'rockstar',
+        'ninja',
+
+        // Indirect phrases
+        'musthave',
+        'weexpect',
+        'shouldhave',
+        'idealcandidate',
+        'minimumrequirement',
+        'strongbackground',
+        'established',
+        'infield',
+
+        // Roles to filter out
+        'manager',
+        'supervisor',
+        'leadengineer',
+        'techlead',
+        'teamlead',
+    ];
+
+    // Format phone number as (xxx) xxx-xxxx
+    const formatPhoneNumber = (value: string) => {
+        // Remove all non-digit characters
+        const cleaned = value.replace(/\D/g, '');
+
+        // Format according to (xxx) xxx-xxxx
+        const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+        if (!match) return value;
+
+        const [, area, prefix, line] = match;
+        if (line) return `(${area}) ${prefix}-${line}`;
+        if (prefix) return `(${area}) ${prefix}`;
+        if (area) return `(${area}`;
+        return '';
     };
 
+    // Validate email address
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validateEmail(contactEmail)) {
+            setIsEmailValid(false);
+            return;
+        }
+
+        const descriptionIsValid = validateDescription(description);
+        setIsDescriptionValid(descriptionIsValid);
+
+        if (!descriptionIsValid) {
+            return; // Prevent submission
+        }
+
+        // Submit the form...
+    };
+
+    // Checking whether a skill is valid
+    const isSkillValid = (skill: string) => {
+        const cleaned = skill.toLowerCase().replace(/[^a-z]/g, '');
+        return !bannedWords.some(banned =>
+            levenshteinDistance(cleaned, banned) <= 2
+        );
+    };
+
+    // Adding skills to list
+    const addSkill = (e: React.FormEvent) => {
+        e.preventDefault();
+        const cleanedSkill = skillInput.trim();
+
+        // Check if skill is accepted
+        if (
+            cleanedSkill &&
+            skills.length < 5 &&
+            isSkillValid(cleanedSkill)
+        ) {
+            setSkills([...skills, cleanedSkill]);
+            setSkillInput('');
+        }
+
+        // Check if skill is rejected
+        if (!isSkillValid(cleanedSkill)) {
+            setIsSkillRejected(true);
+            return;
+        }
+        setIsSkillRejected(false);
+    };
+
+    // Removing skills from list
     const removeSkill = (skillToRemove: string) => {
         setSkills(skills.filter(skill => skill !== skillToRemove));
     };
 
+    // Adding benefits to list
     const addBenefit = (e: React.FormEvent) => {
         e.preventDefault();
         if (benefitInput.trim()) {
@@ -28,8 +159,43 @@ export const PostJob = () => {
         }
     };
 
+    // Remove benefit from list
     const removeBenefit = (benefitToRemove: string) => {
         setBenefits(benefits.filter((b) => b !== benefitToRemove));
+    };
+
+    // Levenshtein Distance function to detect similar words
+    const levenshteinDistance = (a: string, b: string) => {
+        const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]).map((row, i) =>
+            row.concat(Array.from({ length: a.length }, (_, j) => j === 0 ? i : 0))
+        );
+
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                matrix[i][j] = b[i - 1] === a[j - 1]
+                    ? matrix[i - 1][j - 1]
+                    : Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // deletion
+                    );
+            }
+        }
+
+        return matrix[b.length][a.length];
+    };
+
+    // Validate job description against banned words
+    const validateDescription = (desc: string): boolean => {
+        // Normalize: remove symbols, make lowercase, and remove extra spaces
+        const cleaned = desc.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+        const words = cleaned.split(' ');
+
+        return !words.some(word =>
+            bannedWords.some(banned =>
+                levenshteinDistance(word, banned) <= 2 // allow for small typos
+            )
+        );
     };
 
     // Calculate expiration date (1 month from today)
@@ -99,6 +265,7 @@ export const PostJob = () => {
                                     placeholder="City, State or Remote"
                                 />
                             </div>
+
                             <div>
                                 <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
                                     Salary Range <span className="text-red-500">*</span>
@@ -110,6 +277,63 @@ export const PostJob = () => {
                                     placeholder="e.g., $40,000 - $50,000"
                                 />
                             </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Company Phone <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    value={phone}
+                                    onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+                                    maxLength={14}
+                                    required
+                                    placeholder="(123) 456-7890"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="extension" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Extension (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="extension"
+                                    name="extension"
+                                    placeholder="e.g., 101"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                        </div>
+
+                        {/* CONTACT EMAIL */}
+                        <div>
+                            <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                                Contact Email <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="contactEmail"
+                                name="contactEmail"
+                                value={contactEmail}
+                                onChange={(e) => {
+                                    setContactEmail(e.target.value);
+                                    setIsEmailValid(validateEmail(e.target.value));
+                                }}
+                                required
+                                placeholder="hr@example.com"
+                                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${isEmailValid
+                                    ? 'border-gray-300 focus:ring-indigo-500'
+                                    : 'border-red-500 focus:ring-red-500'
+                                    }`}
+                            />
+                            {!isEmailValid && (
+                                <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>
+                            )}
                         </div>
 
                         <div>
@@ -132,6 +356,11 @@ export const PostJob = () => {
                                         </button>
                                     </span>
                                 ))}
+                                {isSkillRejected && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        That skill is not allowed for an entry-level position.
+                                    </p>
+                                )}
                             </div>
                             <div className="flex gap-2">
                                 <input
@@ -218,9 +447,23 @@ export const PostJob = () => {
                             <textarea
                                 id="description"
                                 rows={6}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                value={description}
+                                onChange={(e) => {
+                                    const text = e.target.value;
+                                    setDescription(text);
+                                    setIsDescriptionValid(validateDescription(text));
+                                }}
+                                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${isDescriptionValid
+                                    ? 'border-gray-300 focus:ring-indigo-500'
+                                    : 'border-red-500 focus:ring-red-500'
+                                    }`}
                                 placeholder="Describe the role, responsibilities, and what makes it suitable for entry-level candidates..."
                             ></textarea>
+                            {!isDescriptionValid && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    Please remove any reference to experience requirements — this must be truly entry-level.
+                                </p>
+                            )}
                         </div>
 
                         <div>
@@ -240,7 +483,11 @@ export const PostJob = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+                            disabled={!isDescriptionValid || description.trim() === ''}
+                            className={`w-full px-6 py-3 rounded-lg transition-colors text-white ${isDescriptionValid
+                                ? 'bg-indigo-600 hover:bg-indigo-700'
+                                : 'bg-gray-300 cursor-not-allowed'
+                                }`}
                         >
                             Post Job
                         </button>
