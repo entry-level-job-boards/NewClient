@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Menu, X } from 'lucide-react';
+import { Briefcase, Menu, X, User, Bell, Mail } from 'lucide-react';
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
 
   return (
     <nav className="absolute top-0 left-0 w-full h-20 bg-white shadow-sm z-50">
@@ -15,23 +16,40 @@ export const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
+        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           <Link to="/jobs" className="text-gray-700 hover:text-indigo-600 transition-colors">
-            Browse Jobs
+            Jobs
           </Link>
-          <Link to="/about" className="text-gray-700 hover:text-indigo-600 transition-colors">
+          {/* <Link to="/about" className="text-gray-700 hover:text-indigo-600 transition-colors">
             About
           </Link>
           <Link to="/contact" className="text-gray-700 hover:text-indigo-600 transition-colors">
             Contact
-          </Link>
-          <div className="flex items-center space-x-4">
-            <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors">
-              Log in
-            </Link>
-            <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors">
-              Sign up
-            </Link>
+          </Link> */}
+          <div className="flex items-center space-x-7">
+            {loggedIn ? (
+              <>
+                <Link to="/notifications" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  <Bell className="h-5 w-5" />
+                </Link>
+                <Link to="/messages" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  <Mail className="h-5 w-5" />
+                </Link>
+                <Link to="/account" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  <User className="h-5 w-5" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  Log in
+                </Link>
+                <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors">
+                  Sign up
+                </Link>
+              </>
+            )}
             <Link
               to="/employer"
               className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -78,12 +96,20 @@ export const Navbar = () => {
               Contact
             </Link>
             <div className="flex items-center space-x-4">
-              <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors">
-                Log in
-              </Link>
-              <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors">
-                Sign up
-              </Link>
+              {loggedIn ? (
+                <Link to="/dashboard" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  Account
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                    Log in
+                  </Link>
+                  <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors">
+                    Sign up
+                  </Link>
+                </>
+              )}
               <Link
                 to="/employer"
                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"

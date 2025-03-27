@@ -16,7 +16,9 @@ const sampleJobs: Job[] = [
         isRemote: true,
         skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Git'],
         postedDate: '2024-02-20',
-        expirationDate: '2024-03-20'
+        expirationDate: '2024-03-20',
+        tags: ['Backend Developer', 'Full Stack Developer', 'Remote', "Front End Developer"],
+        degree: 'Bachelor\'s Degree',
     },
     {
         id: '2',
@@ -30,7 +32,9 @@ const sampleJobs: Job[] = [
         isRemote: false,
         skills: ['Communication', 'Customer Service', 'Problem Solving', 'MS Office'],
         postedDate: '2024-02-25',
-        expirationDate: '2024-03-25'
+        expirationDate: '2024-03-25',
+        tags: ['Customer Service', 'Client Success', 'Customer Support'],
+        degree: 'High School Diploma',
     },
     {
         id: '3',
@@ -44,7 +48,9 @@ const sampleJobs: Job[] = [
         isRemote: true,
         skills: ['Social Media', 'Content Creation', 'Graphic Design', 'SEO'],
         postedDate: '2024-03-01',
-        expirationDate: '2024-04-01'
+        expirationDate: '2024-04-01',
+        tags: ['Marketing', 'Social Media', 'Content Creation'],
+        degree: 'High School Diploma',
     },
     {
         id: '4',
@@ -58,7 +64,9 @@ const sampleJobs: Job[] = [
         isRemote: false,
         skills: ['Excel', 'SQL', 'Data Visualization', 'Python'],
         postedDate: '2024-03-05',
-        expirationDate: '2024-04-05'
+        expirationDate: '2024-04-05',
+        tags: ['Data Analyst', 'Data Science', 'Trainee'],
+        degree: 'Bachelor\'s Degree',
     },
     {
         id: '5',
@@ -72,7 +80,9 @@ const sampleJobs: Job[] = [
         isRemote: true,
         skills: ['Adobe Creative Suite', 'Typography', 'Illustration', 'UI/UX Design'],
         postedDate: '2024-03-10',
-        expirationDate: '2024-04-10'
+        expirationDate: '2024-04-10',
+        tags: ['Graphic Design', 'Visual Design', 'Remote', 'Creative'],
+        degree: 'Associate Degree',
     },
 ];
 

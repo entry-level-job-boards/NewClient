@@ -17,6 +17,7 @@ interface JobCardProps {
 }
 
 export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
+
     return (
         <motion.div
             layout
@@ -43,7 +44,7 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                         </div>
                     </div>
                     <div className="flex items-center justify-start sm:justify-end">
-                        <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full flex items-center">
+                        <span className="bg-indigo-100 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full flex items-center">
                             <BadgeCheck className="h-4 w-4 mr-1" />
                             No Experience Required
                         </span>
@@ -80,6 +81,7 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                                 </div>
                             </div>
 
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4 mb-4">
                                 <div className="flex items-center text-gray-600">
                                     <DollarSign className="h-4 w-4 mr-2" />
@@ -98,6 +100,11 @@ export const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
                                         <li key={index}>{benefit}</li>
                                     ))}
                                 </ul>
+                            </div>
+
+                            <div className="mb-4">
+                                <h4 className="font-semibold mb-2">Required Degree:</h4>
+                                <p className="text-gray-600">{job.degree}</p>
                             </div>
 
                             <button

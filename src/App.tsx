@@ -10,6 +10,7 @@ import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 
 import { Chatbot } from './components/ChatBot';
+import { Profile } from './pages/Profile';
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path='/signup' element={<SignUp />} />
+
+          <Route path="/account" element={<Profile />} />
         </Routes>
         <Chatbot />
       </div>

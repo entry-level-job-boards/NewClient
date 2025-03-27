@@ -11,6 +11,8 @@ export interface Job {
   skills: string[];
   postedDate: string;
   expirationDate: string;
+  tags: string[];
+  degree: string;
 }
 
 export interface ApplicationForm {

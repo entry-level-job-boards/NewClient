@@ -23,6 +23,8 @@ export const PostJob = () => {
     const [description, setDescription] = useState('');
     const [isDescriptionValid, setIsDescriptionValid] = useState(true);
 
+    const [degree, setDegree] = useState('');
+
     const bannedWords = [
         // General experience-related
         'experience',
@@ -477,6 +479,24 @@ export const PostJob = () => {
                                     Add
                                 </button>
                             </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="degree" className="block text-sm font-medium text-gray-700 mb-2">
+                                Required Degree <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="degree"
+                                value={degree}
+                                onChange={(e) => setDegree(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                                <option value="">Select a degree</option>
+                                <option value="No Degree Required">No Degree Required</option>
+                                <option value="High School Diploma">High School Diploma</option>
+                                <option value="Associate Degree">Associate Degree</option>
+                                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                            </select>
                         </div>
 
                         <div>
