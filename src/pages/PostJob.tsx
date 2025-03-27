@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
 
 export const PostJob = () => {
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState('');
 
     const [phone, setPhone] = useState('');
 
     const [contactEmail, setContactEmail] = useState('');
     const [isEmailValid, setIsEmailValid] = useState(true);
+
+    const [minSalary, setMinSalary] = useState('');
+    const [maxSalary, setMaxSalary] = useState('');
 
     const [skills, setSkills] = useState<string[]>([]);
     const [skillInput, setSkillInput] = useState('');
@@ -95,6 +100,14 @@ export const PostJob = () => {
     const validateEmail = (email: string) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
+    };
+
+    // Format salary as $xx,xxx
+    const formatSalary = (value: string) => {
+        const cleaned = value.replace(/[^\d]/g, ''); // Remove non-digits
+        if (!cleaned) return '';
+        const number = parseInt(cleaned, 10);
+        return `$${number.toLocaleString()}`;
     };
 
     // const handleSubmit = (e: React.FormEvent) => {
@@ -199,6 +212,18 @@ export const PostJob = () => {
         );
     };
 
+    const addTag = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (tagInput.trim()) {
+            setTags([...tags, tagInput.trim()]);
+            setTagInput('');
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setTags(tags.filter((t) => t !== tagToRemove));
+    };
+
     // Calculate expiration date (1 month from today)
     const today = new Date();
     const expirationDate = new Date(today.setMonth(today.getMonth() + 1));
@@ -268,15 +293,28 @@ export const PostJob = () => {
                             </div>
 
                             <div>
-                                <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Salary Range <span className="text-red-500">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    id="salary"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                    placeholder="e.g., $40,000 - $50,000"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        id="minSalary"
+                                        value={minSalary}
+                                        onChange={(e) => setMinSalary(formatSalary(e.target.value))}
+                                        placeholder="Min Salary"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                    <span className="self-center text-gray-500">-</span>
+                                    <input
+                                        type="text"
+                                        id="maxSalary"
+                                        value={maxSalary}
+                                        onChange={(e) => setMaxSalary(formatSalary(e.target.value))}
+                                        placeholder="Max Salary"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -465,6 +503,56 @@ export const PostJob = () => {
                                     Please remove any reference to experience requirements — this must be truly entry-level.
                                 </p>
                             )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Tags (Add as many as you'd like. This will help us find you the best candidates) <span className="text-red-500">*</span>
+                            </label>
+
+                            {/* TAGS DISPLAY */}
+                            <div className="mb-2">
+                                {tags.map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="inline-flex items-center bg-indigo-50 text-indigo-700 rounded-full px-3 py-1 text-sm mr-2 mb-2"
+                                    >
+                                        {tag}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeTag(tag)}
+                                            className="ml-1 hover:text-indigo-900"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+
+                            {/* TAG INPUT + ADD BUTTON */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={tagInput}
+                                    onChange={(e) => setTagInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            addTag(e);
+                                        }
+                                    }}
+                                    placeholder="Add a tag..."
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={addTag}
+                                    disabled={!tagInput.trim()}
+                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    Add
+                                </button>
+                            </div>
                         </div>
 
                         <div>

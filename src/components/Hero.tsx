@@ -1,6 +1,8 @@
 import { Search, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { Chatbot } from './ChatBot';
+
 export const Hero = () => {
   return (
     <div className="h-screen bg-gradient-to-b from-indigo-50 via-indigo-100 to-white">

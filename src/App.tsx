@@ -9,6 +9,8 @@ import { PostJob } from './pages/PostJob';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 
+import { Chatbot } from './components/ChatBot';
+
 function App() {
   return (
     <Router>
@@ -24,6 +26,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path='/signup' element={<SignUp />} />
         </Routes>
+        <Chatbot />
       </div>
     </Router>
   );

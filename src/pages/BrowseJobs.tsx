@@ -92,6 +92,8 @@ export const BrowseJobs = () => {
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
+    const [skillInput, setSkillInput] = useState('');
+
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
     const suggestionsRef = useRef<HTMLUListElement | null>(null);
 
@@ -131,7 +133,11 @@ export const BrowseJobs = () => {
             // Skills filter
             const matchesSkills =
                 selectedSkills.length === 0 ||
-                selectedSkills.every(skill => job.skills.includes(skill));
+                job.skills
+                    .map((s) => s.toLowerCase())
+                    .some((jobSkill) =>
+                        selectedSkills.some((selected) => selected.toLowerCase() === jobSkill)
+                    );
 
             return matchesSearch && matchesLocationType && matchesSalary && matchesSkills;
         });
@@ -284,19 +290,57 @@ export const BrowseJobs = () => {
 
                             {/* Skills Filter */}
                             <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-2">Skills</h3>
-                                <div className="space-y-2">
-                                    {allSkills.map((skill) => (
-                                        <label key={skill} className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedSkills.includes(skill)}
-                                                onChange={() => toggleSkill(skill)}
-                                                className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
-                                            />
-                                            <span className="ml-2 text-gray-700">{skill}</span>
-                                        </label>
+                                <h3 className="text-sm font-medium text-gray-700 mb-2">Filter by Skills</h3>
+
+                                {/* Skill Tags */}
+                                <div className="mb-2">
+                                    {selectedSkills.map((skill) => (
+                                        <span
+                                            key={skill}
+                                            className="inline-flex items-center bg-indigo-50 text-indigo-700 rounded-full px-3 py-1 text-sm mr-2 mb-2"
+                                        >
+                                            {skill}
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleSkill(skill)}
+                                                className="ml-1 hover:text-indigo-900"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </span>
                                     ))}
+                                </div>
+
+                                {/* Input + Add Button */}
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={skillInput}
+                                        onChange={(e) => setSkillInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                if (skillInput.trim() && !selectedSkills.includes(skillInput.trim())) {
+                                                    setSelectedSkills([...selectedSkills, skillInput.trim()]);
+                                                    setSkillInput('');
+                                                }
+                                            }
+                                        }}
+                                        placeholder="Add a skill to filter..."
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (skillInput.trim() && !selectedSkills.includes(skillInput.trim())) {
+                                                setSelectedSkills([...selectedSkills, skillInput.trim()]);
+                                                setSkillInput('');
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                    >
+                                        Add
+                                    </button>
                                 </div>
                             </div>
                         </div>
