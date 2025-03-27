@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
 
 export const PostJob = () => {
@@ -97,24 +97,25 @@ export const PostJob = () => {
         return regex.test(email);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateEmail(contactEmail)) {
-            setIsEmailValid(false);
-            return;
-        }
+    // const handleSubmit = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     if (!validateEmail(contactEmail)) {
+    //         setIsEmailValid(false);
+    //         return;
+    //     }
 
-        const descriptionIsValid = validateDescription(description);
-        setIsDescriptionValid(descriptionIsValid);
+    //     const descriptionIsValid = validateDescription(description);
+    //     setIsDescriptionValid(descriptionIsValid);
 
-        if (!descriptionIsValid) {
-            return; // Prevent submission
-        }
+    //     if (!descriptionIsValid) {
+    //         return; // Prevent submission
+    //     }
 
-        // Submit the form...
-    };
+    //     // Submit the form...
+    // };
 
     // Checking whether a skill is valid
+
     const isSkillValid = (skill: string) => {
         const cleaned = skill.toLowerCase().replace(/[^a-z]/g, '');
         return !bannedWords.some(banned =>
