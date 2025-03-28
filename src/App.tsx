@@ -11,6 +11,7 @@ import { SignUp } from './pages/SignUp';
 
 import { Chatbot } from './components/ChatBot';
 import { Profile } from './pages/Profile';
+import { Messages } from './pages/Messages';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path='/signup' element={<SignUp />} />
 
           <Route path="/account" element={<Profile />} />
+          <Route path="/messages" element={<Messages />} />
         </Routes>
         <Chatbot />
       </div>
