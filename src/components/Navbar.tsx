@@ -16,7 +16,6 @@ export const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           <Link to="/jobs" className="text-gray-700 hover:text-indigo-600 transition-colors">
             Jobs

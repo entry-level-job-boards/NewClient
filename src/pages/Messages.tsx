@@ -34,6 +34,30 @@ const sampleMessages: Message[] = [
         date: 'Mar 18, 2025',
         isRead: false,
     },
+    {
+        id: 3,
+        sender: 'DevConnect',
+        subject: 'New Job Posting: Frontend Developer',
+        body: 'Check out this new opportunity that matches your profile.',
+        date: 'Mar 15, 2025',
+        isRead: true,
+    },
+    {
+        id: 4,
+        sender: 'Recruitment Team at Innovatech',
+        subject: 'Follow-up on Your Application',
+        body: 'We wanted to follow up regarding your application for the Software Engineer position.',
+        date: 'Mar 10, 2025',
+        isRead: true,
+    },
+    {
+        id: 5,
+        sender: 'EntryPoint Careers',
+        subject: 'Weekly Job Digest',
+        body: 'Here are the latest job openings curated just for you.',
+        date: 'Mar 8, 2025',
+        isRead: false,
+    },
 ];
 
 export const Messages = () => {
@@ -116,7 +140,7 @@ export const Messages = () => {
                             key={message.id}
                             ref={(el) => (messageRefs.current[index] = el)}
                             onClick={() => selectMessageByIndex(index)}
-                            className={`w-full text-left p-3 rounded-md transition-all duration-200 border flex flex-col ${selectedIndex === index
+                            className={`w-full text-left p-3 rounded-md transition-all duration-200 border flex flex-col outline-none ${selectedIndex === index
                                 ? 'bg-indigo-50 border-indigo-200'
                                 : message.isRead
                                     ? 'bg-white hover:bg-gray-50 border-transparent'

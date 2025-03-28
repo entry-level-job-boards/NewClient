@@ -12,6 +12,7 @@ import { SignUp } from './pages/SignUp';
 import { Chatbot } from './components/ChatBot';
 import { Profile } from './pages/Profile';
 import { Messages } from './pages/Messages';
+import { Notifications } from './pages/Notifications';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
 
           <Route path="/account" element={<Profile />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
         <Chatbot />
       </div>
