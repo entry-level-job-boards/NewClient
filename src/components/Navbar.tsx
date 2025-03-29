@@ -38,6 +38,12 @@ export const Navbar = () => {
                 <Link to="/account" className="text-gray-700 hover:text-indigo-600 transition-colors">
                   <User className="h-5 w-5" />
                 </Link>
+                <Link
+                  to="/employer"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Post a Job
+                </Link>
               </>
             ) : (
               <>
@@ -49,12 +55,6 @@ export const Navbar = () => {
                 </Link>
               </>
             )}
-            <Link
-              to="/employer"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Post a Job
-            </Link>
           </div>
         </div>
 
@@ -72,50 +72,55 @@ export const Navbar = () => {
       {/* Mobile Menu Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-md px-4 py-4 absolute top-20 w-full z-40">
-          <div className="flex flex-col space-y-4">
-            <Link
-              to="/jobs"
-              className="text-gray-700 hover:text-indigo-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Browse Jobs
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-700 hover:text-indigo-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-700 hover:text-indigo-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <div className="flex items-center space-x-4">
-              {loggedIn ? (
-                <Link to="/dashboard" className="text-gray-700 hover:text-indigo-600 transition-colors">
+          <div className="flex flex-col space-y-6 animate-fade-in-stagger">
+            {loggedIn ? (
+              <>
+                <Link
+                  to="/jobs"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-indigo-600 transition-colors pl-3 border-l-[3px] border-indigo-500 animate-slide-in delay-[50ms]"
+                >
+                  Jobs
+                </Link>
+                <Link
+                  to="/notifications"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-indigo-600 transition-colors pl-3 border-l-[3px] border-yellow-500 animate-slide-in delay-[100ms]"
+                >
+                  Notifications
+                </Link>
+                <Link
+                  to="/messages"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-indigo-600 transition-colors pl-3 border-l-[3px] border-purple-500 animate-slide-in delay-[150ms]"
+                >
+                  Messages
+                </Link>
+                <Link
+                  to="/account"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-indigo-600 transition-colors pl-3 border-l-[3px] border-gray-500 animate-slide-in delay-[200ms]"
+                >
                   Account
                 </Link>
-              ) : (
-                <>
-                  <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors">
-                    Log in
-                  </Link>
-                  <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors">
-                    Sign up
-                  </Link>
-                </>
-              )}
-              <Link
-                to="/employer"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Post a Job
-              </Link>
-            </div>
+                <Link
+                  to="/employer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors animate-slide-in delay-[250ms]"
+                >
+                  Post a Job
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-gray-700 hover:text-indigo-600 transition-colors animate-slide-in delay-[50ms]">
+                  Log in
+                </Link>
+                <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 transition-colors animate-slide-in delay-[100ms]">
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -32,7 +32,10 @@ export const PasswordRequirements = ({ show, password, tooltipRef }: Props) => {
     );
 
     return (
-        <div ref={tooltipRef} className="absolute top-0 left-full ml-4 z-20 w-64 bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+        <div
+            ref={tooltipRef}
+            className="w-64 max-w-md bg-white p-4"
+        >
             <h4 className="text-sm font-semibold text-gray-800 mb-2">Password must include:</h4>
             <ul className="space-y-1">
                 <Requirement valid={hasUppercase(password)} text="At least one uppercase letter" />
