@@ -1,248 +1,13 @@
-// import { useState, useEffect, useRef } from 'react';
-// import { Link } from 'react-router-dom';
-// import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-
-// import { PasswordRequirements } from '../components/Requirements';
-
-// export const SignUp = () => {
-
-//     const [first_name, setFirstName] = useState('');
-//     const [last_name, setLastName] = useState('');
-//     const [phone_number, setPhoneNumber] = useState('');
-//     const [address, setAddress] = useState('');
-//     const [city, setCity] = useState('');
-//     const [state, setState] = useState('');
-//     const [zip_code, setZipCode] = useState('');
-//     const [month, setMonth] = useState('');
-//     const [day, setDay] = useState('');
-//     const [year, setYear] = useState('');
-
-//     const passwordInputRef = useRef<HTMLInputElement | null>(null);
-//     const tooltipRef = useRef<HTMLDivElement | null>(null);
-
-//     const [showPassword, setShowPassword] = useState(false);
-//     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-//     const [email, setEmail] = useState('');
-//     const [emailError, setEmailError] = useState('');
-
-//     const [password, setPassword] = useState('');
-//     const [confirmPassword, setConfirmPassword] = useState('');
-//     const [passwordsMatch, setPasswordsMatch] = useState(true);
-
-//     const [showRequirements, setShowRequirements] = useState(false);
-
-//     const shouldHighlightMatch =
-//         password.length > 0 &&
-//         confirmPassword.length > 0 &&
-//         password === confirmPassword;
-
-//     useEffect(() => {
-//         if (password !== confirmPassword && confirmPassword.length > 0 && password.length === confirmPassword.length) {
-//             setPasswordsMatch(false);
-//         } else {
-//             setPasswordsMatch(true);
-//         }
-//     }, [password, confirmPassword]);
-
-//     const handleSetShowRequirements = () => {
-//         setShowRequirements(!showRequirements);
-//     };
-
-//     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//         const value = e.target.value;
-//         setEmail(value);
-
-//         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//         if (!emailRegex.test(value)) {
-//             setEmailError('Please enter a valid email address.');
-//         } else {
-//             setEmailError('');
-//         }
-//     };
-
-//     useEffect(() => {
-//         const handleClickOutside = (e: MouseEvent) => {
-//             if (
-//                 passwordInputRef.current &&
-//                 !passwordInputRef.current.contains(e.target as Node) &&
-//                 tooltipRef.current &&
-//                 !tooltipRef.current.contains(e.target as Node)
-//             ) {
-//                 setShowRequirements(false);
-//             }
-//         };
-
-//         document.addEventListener('mousedown', handleClickOutside);
-//         return () => {
-//             document.removeEventListener('mousedown', handleClickOutside);
-//         };
-//     }, []);
-
-//     return (
-//         <div className="min-h-screen flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-gray-50">
-//             <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg">
-//                 <div>
-//                     <h2 className="text-center text-3xl font-bold text-gray-900">Create your account</h2>
-//                     <p className="mt-2 text-center text-sm text-gray-600">
-//                         Already have an account?{' '}
-//                         <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-//                             Sign in
-//                         </Link>
-//                     </p>
-//                 </div>
-//                 <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()} autoComplete='off'>
-//                     {/* // =========================== NAME =========================== // */}
-//                     <div className="space-y-4">
-//                         <div>
-//                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Full Name
-//                             </label>
-//                             <div className="mt-1 relative">
-//                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-//                                     <User className="h-5 w-5 text-gray-400" />
-//                                 </div>
-//                                 <input
-//                                     id="name"
-//                                     name="name"
-//                                     type="text"
-//                                     required
-//                                     className="appearance-none block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-//                                     placeholder="John Doe"
-//                                 />
-//                             </div>
-//                         </div>
-
-//                         {/*  =========================== EMAIL =========================== */}
-//                         <div>
-//                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Email address
-//                             </label>
-//                             <div className="mt-1 relative">
-//                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-//                                     <Mail className="h-5 w-5 text-gray-400" />
-//                                 </div>
-//                                 <input
-//                                     id="email"
-//                                     name="email"
-//                                     type="email"
-//                                     autoComplete="new-email"
-//                                     onChange={handleEmailChange}
-//                                     required
-//                                     className="appearance-none block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-//                                     placeholder="you@example.com"
-//                                 />
-//                                 {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
-//                             </div>
-//                         </div>
-
-//                         {/* // =========================== PASSWORD =========================== // */}
-//                         <div>
-//                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Password
-//                             </label>
-//                             <div className="mt-1 relative">
-//                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-//                                     <Lock className="h-5 w-5 text-gray-400" />
-//                                 </div>
-//                                 <input
-//                                     id="password"
-//                                     name="password"
-//                                     type={showPassword ? "text" : "password"}
-//                                     onChange={(e) => setPassword(e.target.value)}
-//                                     onFocus={handleSetShowRequirements}
-//                                     ref={passwordInputRef}
-//                                     required
-//                                     className={`appearance-none block w-full pl-10 pr-10 py-4 border rounded-lg focus:outline-none focus:ring-2 focus:border-indigo-500 ${shouldHighlightMatch
-//                                         ? 'border-green-500 bg-green-50 focus:ring-green-500'
-//                                         : 'border-gray-300 focus:ring-indigo-500'
-//                                         }`}
-//                                     placeholder="••••••••"
-//                                 />
-//                                 {showRequirements && (
-//                                     <PasswordRequirements
-//                                         password={password}
-//                                         show={showRequirements}
-//                                         tooltipRef={tooltipRef}
-//                                     />
-//                                 )}
-//                                 <button
-//                                     type="button"
-//                                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
-//                                     onClick={() => setShowPassword(!showPassword)}
-//                                 >
-//                                     {showPassword ? (
-//                                         <EyeOff className="h-5 w-5 text-gray-400" />
-//                                     ) : (
-//                                         <Eye className="h-5 w-5 text-gray-400" />
-//                                     )}
-//                                 </button>
-//                             </div>
-//                         </div>
-
-
-//                         {/* // =========================== CONFIRM PASSWORD =========================== // */}
-//                         <div>
-//                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Confirm Password
-//                             </label>
-//                             <div className="mt-1 relative">
-//                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-//                                     <Lock className="h-5 w-5 text-gray-400" />
-//                                 </div>
-//                                 <input
-//                                     id="confirmPassword"
-//                                     name="confirmPassword"
-//                                     type={showConfirmPassword ? "text" : "password"}
-//                                     onChange={(e) => setConfirmPassword(e.target.value)}
-//                                     required
-//                                     className={`appearance-none block w-full pl-10 pr-10 py-4 border rounded-lg focus:outline-none focus:ring-2 focus:border-indigo-500 ${shouldHighlightMatch
-//                                         ? 'border-green-500 bg-green-50 focus:ring-green-500'
-//                                         : 'border-gray-300 focus:ring-indigo-500'
-//                                         }`}
-//                                     placeholder="••••••••"
-//                                 />
-//                                 {!passwordsMatch && (
-//                                     <p className="text-red-500 text-sm mt-1">Passwords do not match</p>
-//                                 )}
-//                                 <button
-//                                     type="button"
-//                                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
-//                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-//                                 >
-//                                     {showConfirmPassword ? (
-//                                         <EyeOff className="h-5 w-5 text-gray-400" />
-//                                     ) : (
-//                                         <Eye className="h-5 w-5 text-gray-400" />
-//                                     )}
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     <div>
-//                         <button
-//                             type="submit"
-//                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-//                         >
-//                             Create Account
-//                         </button>
-//                     </div>
-//                 </form>
-//             </div>
-//         </div>
-//     );
-// };
-
-// Fully integrated and fixed version of your multi-step signup form with responsive tooltip positioning
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { PasswordRequirements } from '../components/Requirements';
 
+import { encryptData } from '../utils/encrypt.ts';
+
 export const SignUp = () => {
     const [step, setStep] = useState(0);
-    const totalSteps = 4;
+    const totalSteps = 5;
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -254,6 +19,9 @@ export const SignUp = () => {
         state: '',
         zip_code: '',
         password: '',
+        month: '',
+        day: '',
+        year: '',
     });
 
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -271,14 +39,12 @@ export const SignUp = () => {
 
         if (name === 'phone_number') {
             const cleaned = value.replace(/\D/g, '');
-
             let formatted = cleaned;
             if (cleaned.length > 3 && cleaned.length <= 6) {
                 formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
             } else if (cleaned.length > 6) {
                 formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
             }
-
             setFormData((prev) => ({ ...prev, [name]: formatted }));
         } else {
             setFormData((prev) => ({ ...prev, [name]: value }));
@@ -292,9 +58,7 @@ export const SignUp = () => {
     };
 
     useEffect(() => {
-        setPasswordsMatch(
-            formData.password === confirmPassword || confirmPassword.length === 0
-        );
+        setPasswordsMatch(formData.password === confirmPassword || confirmPassword.length === 0);
     }, [formData.password, confirmPassword]);
 
     useEffect(() => {
@@ -308,7 +72,6 @@ export const SignUp = () => {
                 setShowRequirements(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
@@ -316,10 +79,48 @@ export const SignUp = () => {
     const next = () => setStep((prev) => Math.min(prev + 1, totalSteps - 1));
     const back = () => setStep((prev) => Math.max(prev - 1, 0));
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const submissionData = { ...formData }; // confirmPassword is not included
-        console.log('Submitting:', submissionData);
+    const handleSubmit = async () => {
+        if (
+            !formData.first_name ||
+            !formData.last_name ||
+            !formData.email ||
+            !formData.password ||
+            !formData.month ||
+            !formData.day ||
+            !formData.year ||
+            formData.password !== confirmPassword
+        ) {
+            alert("Please fill out all fields, including date of birth, and make sure passwords match.");
+            return;
+        }
+
+        const submissionData = {
+            ...formData,
+        };
+
+        const encrypted = encryptData(submissionData);
+
+        try {
+            const response = await fetch('http://localhost:3002/api/create-applicant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ payload: encrypted }), // send encrypted data as "payload"
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create account');
+            }
+
+            const result = await response.json();
+            console.log('Account created!', result);
+            alert('Account created successfully!');
+        } catch (error: any) {
+            console.error('Signup error:', error.message);
+            alert(`Error: ${error.message}`);
+        }
     };
 
     return (
@@ -334,7 +135,7 @@ export const SignUp = () => {
                         </Link>
                     </p>
 
-                    <form onSubmit={handleSubmit} autoComplete="off" className="mt-8">
+                    <form autoComplete="off" className="mt-8">
                         <div className="overflow-hidden w-full relative">
                             <div
                                 className="flex transition-transform duration-500 ease-in-out"
@@ -366,6 +167,39 @@ export const SignUp = () => {
                                     <div className="flex space-x-2">
                                         <input name="state" value={formData.state} onChange={handleChange} placeholder="State" className="w-1/2 p-3 border border-gray-300 rounded-lg" />
                                         <input name="zip_code" value={formData.zip_code} onChange={handleChange} placeholder="Zip" className="w-1/2 p-3 border border-gray-300 rounded-lg" />
+                                    </div>
+                                </div>
+
+                                <div className="w-[380px] flex-shrink-0 px-1 space-y-4">
+                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                    <div className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            name="month"
+                                            value={formData.month}
+                                            onChange={handleChange}
+                                            placeholder="MM"
+                                            maxLength={2}
+                                            className="w-1/3 p-3 border border-gray-300 rounded-lg"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="day"
+                                            value={formData.day}
+                                            onChange={handleChange}
+                                            placeholder="DD"
+                                            maxLength={2}
+                                            className="w-1/3 p-3 border border-gray-300 rounded-lg"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="year"
+                                            value={formData.year}
+                                            onChange={handleChange}
+                                            placeholder="YYYY"
+                                            maxLength={4}
+                                            className="w-1/3 p-3 border border-gray-300 rounded-lg"
+                                        />
                                     </div>
                                 </div>
 
@@ -439,7 +273,8 @@ export const SignUp = () => {
                                 </button>
                             ) : (
                                 <button
-                                    type="submit"
+                                    type="button"
+                                    onClick={handleSubmit}
                                     className="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                                 >
                                     Create Account
@@ -449,7 +284,7 @@ export const SignUp = () => {
                     </form>
                 </div>
 
-                {/* Desktop tooltip (unchanged) */}
+                {/* Desktop tooltip */}
                 {showRequirements && (
                     <div
                         ref={tooltipRef}
@@ -463,7 +298,7 @@ export const SignUp = () => {
                     </div>
                 )}
 
-                {/* Mobile tooltip (fixed at bottom but same look) */}
+                {/* Mobile tooltip */}
                 {showRequirements && (
                     <div className="block md:hidden fixed bottom-[75px] left-[-15px] w-full px-4 pb-4 z-50">
                         <div className="bg-white rounded-t-lg p-4 max-w-md mx-auto">
@@ -476,7 +311,6 @@ export const SignUp = () => {
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

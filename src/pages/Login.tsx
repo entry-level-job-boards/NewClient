@@ -1,9 +1,37 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            const response = await fetch('http://localhost:3002/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || 'Login failed');
+
+            console.log('Login successful:', data);
+
+            navigate('/jobs');
+            // Optionally: store auth token, navigate, etc.
+        } catch (err: any) {
+            alert(`Login failed: ${err.message}`);
+        }
+    };
 
     return (
         <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -17,7 +45,7 @@ export const Login = () => {
                         </Link>
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -32,6 +60,8 @@ export const Login = () => {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="appearance-none block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="you@example.com"
@@ -52,6 +82,8 @@ export const Login = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="appearance-none block w-full pl-10 pr-10 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="••••••••"
                                 />
