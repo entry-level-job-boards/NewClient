@@ -4,7 +4,7 @@ import { Briefcase, Menu, X, User, Bell, Mail } from 'lucide-react';
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(true);
+  const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; // Check if user is logged in
 
   return (
     <nav className="absolute top-0 left-0 w-full h-20 bg-white shadow-sm z-50">
@@ -38,11 +38,17 @@ export const Navbar = () => {
                 <Link to="/account" className="text-gray-700 hover:text-indigo-600 transition-colors">
                   <User className="h-5 w-5" />
                 </Link>
-                <Link
+                {/* <Link
                   to="/employer"
                   className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Post a Job
+                </Link> */}
+                <Link
+                  to="/logout-success"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Log Out
                 </Link>
               </>
             ) : (

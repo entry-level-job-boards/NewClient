@@ -39,6 +39,7 @@ export const Login = () => {
             localStorage.setItem('user', JSON.stringify(data.user));
 
             navigate('/jobs');
+            window.location.reload();
         } catch (err: any) {
             localStorage.removeItem('isLoggedIn');
             alert(`Login failed: ${err.message}`);

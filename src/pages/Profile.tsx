@@ -100,20 +100,10 @@ export const Profile = () => {
         }));
     };
 
-    // const handleAddSkill = (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     if (newSkill.trim()) {
-    //         setFormData(prev => ({
-    //             ...prev,
-    //             skills: [...prev.skills, newSkill.trim()]
-    //         }));
-    //         setNewSkill('');
-    //     }
-    // };
-
-    const handleAddSkill = async (e: React.FormEvent) => {
+    const handleAddSkill = async (e: React.FormEvent, overrideSkill?: string) => {
         e.preventDefault();
-        const skillToAdd = newSkill.trim();
+
+        const skillToAdd = (overrideSkill ?? newSkill).trim();
         if (!skillToAdd || formData.skills.includes(skillToAdd)) return;
 
         const updatedSkills = [...formData.skills, skillToAdd];
@@ -125,12 +115,9 @@ export const Profile = () => {
         if (!userId) return;
 
         try {
-            // Update backend with new skills
             const updates = { my_skills: updatedSkills };
-            console.log('Sending updates:', updates);
             await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', updates);
 
-            // Update local state if successful
             setFormData(prev => ({
                 ...prev,
                 skills: updatedSkills
@@ -144,11 +131,28 @@ export const Profile = () => {
         }
     };
 
-    const handleRemoveSkill = (skillToRemove: string) => {
+    const handleRemoveSkill = async (skillToRemove: string) => {
+        const updatedSkills = formData.skills.filter(skill => skill !== skillToRemove);
+
         setFormData(prev => ({
             ...prev,
-            skills: prev.skills.filter(skill => skill !== skillToRemove)
+            skills: updatedSkills
         }));
+
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return;
+
+        const userId = JSON.parse(storedUser).id;
+        if (!userId) return;
+
+        try {
+            // Update the backend with the new skills array
+            await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', { my_skills: updatedSkills });
+
+            console.log('✅ Skill removed and synced to backend');
+        } catch (err: any) {
+            console.error('❌ Failed to update skills:', err.message);
+        }
     };
 
     const handleSaveChanges = () => {
@@ -346,7 +350,10 @@ export const Profile = () => {
                                                     </span>
                                                 ))}
                                                 {isEditing && (
+
                                                     <div className="w-full relative overflow-visible z-10">
+
+                                                        {/* Add Skill Section */}
                                                         <form onSubmit={handleAddSkill} className="flex">
                                                             <div className="relative w-full">
 
@@ -372,28 +379,39 @@ export const Profile = () => {
                                                                     onKeyDown={(e) => {
                                                                         if (e.key === 'ArrowDown') {
                                                                             e.preventDefault();
-                                                                            setActiveSuggestionIndex(prev =>
-                                                                                prev < suggestions.length - 1 ? prev + 1 : 0
-                                                                            );
+                                                                            setActiveSuggestionIndex(prev => {
+                                                                                const next = prev < suggestions.length - 1 ? prev + 1 : 0;
+                                                                                setNewSkill(suggestions[next] || '');
+                                                                                return next;
+                                                                            });
                                                                         } else if (e.key === 'ArrowUp') {
                                                                             e.preventDefault();
-                                                                            setActiveSuggestionIndex(prev =>
-                                                                                prev > 0 ? prev - 1 : suggestions.length - 1
-                                                                            );
+                                                                            setActiveSuggestionIndex(prev => {
+                                                                                const next = prev > 0 ? prev - 1 : suggestions.length - 1;
+                                                                                setNewSkill(suggestions[next] || '');
+                                                                                return next;
+                                                                            });
                                                                         } else if (e.key === 'Enter') {
                                                                             e.preventDefault();
-                                                                            if (activeSuggestionIndex >= 0 && suggestions.length > 0) {
-                                                                                const selected = suggestions[activeSuggestionIndex];
-                                                                                setFormData(prev => ({
-                                                                                    ...prev,
-                                                                                    skills: [...prev.skills, selected]
-                                                                                }));
-                                                                                setNewSkill('');
-                                                                                setSuggestions([]);
-                                                                                setActiveSuggestionIndex(-1);
-                                                                            } else {
-                                                                                handleAddSkill(e); // fallback
+
+                                                                            // Use selected suggestion if available, else fall back to user input
+                                                                            const skillToAdd = activeSuggestionIndex >= 0
+                                                                                ? suggestions[activeSuggestionIndex]
+                                                                                : newSkill.trim();
+
+                                                                            if (skillToAdd) {
+                                                                                // Set input manually and let handleAddSkill use it
+                                                                                setNewSkill(skillToAdd);
+
+                                                                                // Submit the form to trigger handleAddSkill
+                                                                                const form = e.currentTarget.closest('form');
+                                                                                if (form) {
+                                                                                    form.requestSubmit();
+                                                                                }
                                                                             }
+
+                                                                            setSuggestions([]);
+                                                                            setActiveSuggestionIndex(-1);
                                                                         } else if (e.key === 'Escape') {
                                                                             setSuggestions([]);
                                                                             setActiveSuggestionIndex(-1);

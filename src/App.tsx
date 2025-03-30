@@ -14,6 +14,8 @@ import { Profile } from './pages/Profile';
 import { Messages } from './pages/Messages';
 import { Notifications } from './pages/Notifications';
 
+import { LogoutSuccess } from './components/logout-success';
+
 function App() {
   return (
     <Router>
@@ -32,6 +34,8 @@ function App() {
           <Route path="/account" element={<Profile />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/notifications" element={<Notifications />} />
+
+          <Route path="/logout-success" element={<LogoutSuccess />} />
         </Routes>
         <Chatbot />
       </div>
