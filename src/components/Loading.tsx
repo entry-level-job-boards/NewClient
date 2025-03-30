@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export const LoadingSpinner = () => {
     return (
-        <div className="flex items-center justify-center h-screen bg-white">
+        <div className="flex items-center justify-center h-screen bg-transparent">
             <motion.div
                 className="relative w-24 h-24"
                 initial={{ rotate: 0 }}

@@ -10,6 +10,10 @@ export const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const [userData, setUserData] = useState<any>(null); // Store user data after login
+
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -22,10 +26,21 @@ export const Login = () => {
             });
 
             console.log('Login successful:', data);
+            setUserData(data.user); // Store user data in state
+            // ✅ Check if user data is returned
+            if (!data || !data.user) {
+                throw new Error('Login failed: No user data returned');
+            }
+
+            // ✅ Save login state
+            localStorage.setItem('isLoggedIn', 'true'); // OR: sessionStorage.setItem('isLoggedIn', 'true');
+
+            // Store user data
+            localStorage.setItem('user', JSON.stringify(data.user));
 
             navigate('/jobs');
-            // Optionally: store auth token, navigate, etc.
         } catch (err: any) {
+            localStorage.removeItem('isLoggedIn');
             alert(`Login failed: ${err.message}`);
         }
     };

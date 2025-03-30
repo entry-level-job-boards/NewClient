@@ -3,6 +3,8 @@ import { Job } from '../types';
 import { JobCard } from '../components/JobCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 
+import { jobSkills } from '../utils/skills';
+
 const sampleJobs: Job[] = [
     {
         id: '1',
@@ -105,6 +107,7 @@ export const BrowseJobs = () => {
     const [skillInput, setSkillInput] = useState('');
 
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+    const [isFocused, setIsFocused] = useState(false);
     const suggestionsRef = useRef<HTMLUListElement | null>(null);
 
     // Get unique skills from all jobs
@@ -189,9 +192,11 @@ export const BrowseJobs = () => {
                             type="text"
                             placeholder="Search by title, company, or location..."
                             value={searchQuery}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setTimeout(() => setIsFocused(false), 150)} // small delay to allow click on suggestion
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
-                                setActiveSuggestionIndex(-1)
+                                setActiveSuggestionIndex(-1);
                             }}
                             onKeyDown={(e) => {
                                 if (e.key === 'ArrowDown') {
@@ -212,7 +217,7 @@ export const BrowseJobs = () => {
                             }}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
-                        {suggestions.length > 0 && (
+                        {isFocused && suggestions.length > 0 && (
                             <ul
                                 ref={suggestionsRef}
                                 className="absolute z-10 bg-white border border-gray-300 rounded-md shadow-md mt-1 w-full max-h-60 overflow-y-auto"
@@ -224,7 +229,9 @@ export const BrowseJobs = () => {
                                             setSearchQuery(item);
                                             setActiveSuggestionIndex(-1);
                                         }}
-                                        className={`px-4 py-2 cursor-pointer text-sm text-gray-700 ${index === activeSuggestionIndex ? 'bg-indigo-100 text-indigo-800' : 'hover:bg-indigo-50'
+                                        className={`px-4 py-2 cursor-pointer text-sm text-gray-700 ${index === activeSuggestionIndex
+                                            ? 'bg-indigo-100 text-indigo-800'
+                                            : 'hover:bg-indigo-50'
                                             }`}
                                     >
                                         {item}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
 
+import { jobSkills } from '../utils/skills';
+
 export const PostJob = () => {
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
@@ -24,6 +26,11 @@ export const PostJob = () => {
     const [isDescriptionValid, setIsDescriptionValid] = useState(true);
 
     const [degree, setDegree] = useState('');
+
+    const [skillSuggestions, setSkillSuggestions] = useState<string[]>([]);
+    const [isSkillInputFocused, setIsSkillInputFocused] = useState(false);
+
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
     const bannedWords = [
         // General experience-related
@@ -203,13 +210,19 @@ export const PostJob = () => {
 
     // Validate job description against banned words
     const validateDescription = (desc: string): boolean => {
-        // Normalize: remove symbols, make lowercase, and remove extra spaces
         const cleaned = desc.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
         const words = cleaned.split(' ');
 
+        const flagged = words.filter(word =>
+            word.length > 4 && bannedWords.some(banned =>
+                levenshteinDistance(word, banned) <= 1
+            )
+        );
+        console.log('Flagged words:', flagged);
+
         return !words.some(word =>
-            bannedWords.some(banned =>
-                levenshteinDistance(word, banned) <= 2 // allow for small typos
+            word.length > 4 && bannedWords.some(banned =>
+                levenshteinDistance(word, banned) <= 1
             )
         );
     };
@@ -403,31 +416,116 @@ export const PostJob = () => {
                                     </p>
                                 )}
                             </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={skillInput}
-                                    onChange={(e) => setSkillInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            addSkill(e);
+                            <div className="relative w-full">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={skillInput}
+                                        onChange={(e) => {
+                                            const input = e.target.value;
+                                            setSkillInput(input);
+
+                                            if (input.length > 0) {
+                                                const matches = jobSkills
+                                                    .filter(skill =>
+                                                        skill.toLowerCase().startsWith(input.toLowerCase())
+                                                    )
+                                                    .slice(0, 5);
+                                                setSkillSuggestions(matches);
+                                            } else {
+                                                setSkillSuggestions([]);
+                                            }
+
+                                            setIsSkillRejected(false);
+                                        }}
+                                        onFocus={() => {
+                                            setIsSkillInputFocused(true);
+                                            if (skillInput.trim().length > 0) {
+                                                const matches = jobSkills
+                                                    .filter(skill =>
+                                                        skill.toLowerCase().startsWith(skillInput.toLowerCase())
+                                                    )
+                                                    .slice(0, 5);
+                                                setSkillSuggestions(matches);
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            setTimeout(() => {
+                                                setIsSkillInputFocused(false);
+                                                setActiveSuggestionIndex(-1);
+                                            }, 150);
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'ArrowDown') {
+                                                e.preventDefault();
+                                                setActiveSuggestionIndex(prev =>
+                                                    prev < skillSuggestions.length - 1 ? prev + 1 : 0
+                                                );
+                                            } else if (e.key === 'ArrowUp') {
+                                                e.preventDefault();
+                                                setActiveSuggestionIndex(prev =>
+                                                    prev > 0 ? prev - 1 : skillSuggestions.length - 1
+                                                );
+                                            } else if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                if (activeSuggestionIndex >= 0 && skillSuggestions.length > 0) {
+                                                    const selected = skillSuggestions[activeSuggestionIndex];
+                                                    if (!skills.includes(selected)) {
+                                                        setSkills(prev => [...prev, selected]);
+                                                        setSkillInput('');
+                                                        setSkillSuggestions([]);
+                                                        setIsSkillRejected(false);
+                                                        setActiveSuggestionIndex(-1);
+                                                    }
+                                                } else {
+                                                    addSkill(e); // fallback to normal add
+                                                }
+                                            } else if (e.key === 'Escape') {
+                                                setSkillSuggestions([]);
+                                                setActiveSuggestionIndex(-1);
+                                            }
+                                        }}
+                                        disabled={skills.length >= 5}
+                                        placeholder={
+                                            skills.length >= 5 ? 'Maximum skills reached' : 'Add a skill...'
                                         }
-                                    }}
-                                    disabled={skills.length >= 5}
-                                    placeholder={
-                                        skills.length >= 5 ? 'Maximum skills reached' : 'Add a skill...'
-                                    }
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={addSkill}
-                                    disabled={skills.length >= 5 || !skillInput.trim()}
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                >
-                                    Add
-                                </button>
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={addSkill}
+                                        disabled={skills.length >= 5 || !skillInput.trim()}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+
+                                {/* Suggestion dropdown */}
+                                {isSkillInputFocused && skillSuggestions.length > 0 && (
+                                    <ul className="absolute left-0 right-0 z-50 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+                                        {skillSuggestions.map((suggestion, index) => (
+                                            <li
+                                                key={index}
+                                                onMouseDown={() => {
+                                                    if (!skills.includes(suggestion)) {
+                                                        setSkills(prev => [...prev, suggestion]);
+                                                        setSkillInput('');
+                                                        setSkillSuggestions([]);
+                                                        setIsSkillRejected(false);
+                                                        setActiveSuggestionIndex(-1);
+                                                    }
+                                                }}
+                                                className={`px-4 py-2 cursor-pointer text-sm ${index === activeSuggestionIndex
+                                                    ? 'bg-indigo-100 text-indigo-800'
+                                                    : 'hover:bg-indigo-50'
+                                                    }`}
+                                            >
+                                                {suggestion}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         </div>
 
