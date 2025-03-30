@@ -4,7 +4,7 @@ export const LogoutSuccess = () => {
     useEffect(() => {
         // Clear local storage or any other logout operations
         localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userData'); // Clear user data if needed
+        localStorage.removeItem('user'); // Clear user data if needed
 
         // Optionally redirect to home or login page after a timeout
         setTimeout(() => {

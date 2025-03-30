@@ -17,9 +17,6 @@ export const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/jobs" className="text-gray-700 hover:text-indigo-600 transition-colors">
-            Jobs
-          </Link>
           {/* <Link to="/about" className="text-gray-700 hover:text-indigo-600 transition-colors">
             About
           </Link>
@@ -29,6 +26,9 @@ export const Navbar = () => {
           <div className="flex items-center space-x-7">
             {loggedIn ? (
               <>
+                <Link to="/jobs" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                  Jobs
+                </Link>
                 <Link to="/notifications" className="text-gray-700 hover:text-indigo-600 transition-colors">
                   <Bell className="h-5 w-5" />
                 </Link>

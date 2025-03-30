@@ -3,8 +3,6 @@ import { Job } from '../types';
 import { JobCard } from '../components/JobCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 
-import { jobSkills } from '../utils/skills';
-
 const sampleJobs: Job[] = [
     {
         id: '1',
@@ -109,13 +107,6 @@ export const BrowseJobs = () => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
     const [isFocused, setIsFocused] = useState(false);
     const suggestionsRef = useRef<HTMLUListElement | null>(null);
-
-    // Get unique skills from all jobs
-    const allSkills = useMemo(() => {
-        const skillsSet = new Set<string>();
-        sampleJobs.forEach(job => job.skills.forEach(skill => skillsSet.add(skill)));
-        return Array.from(skillsSet);
-    }, []);
 
     const handleToggleJob = (jobId: string) => {
         setExpandedJobId(prev => (prev === jobId ? null : jobId));

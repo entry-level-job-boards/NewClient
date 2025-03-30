@@ -12,8 +12,6 @@ export const Login = () => {
 
     const [userData, setUserData] = useState<any>(null); // Store user data after login
 
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
