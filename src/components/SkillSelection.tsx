@@ -6,24 +6,28 @@ export const SkillSelection = () => {
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [skills, setSkills] = useState<(string | null)[]>([]); // Track per slot
 
+    const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
+
     useEffect(() => {
         const shuffled = [...softSkills].sort(() => Math.random() - 0.5).slice(0, 14);
         setSkills(shuffled);
     }, []);
 
-    const handleSkillChange = (index: number, skill: string) => {
+    const handleSkillChange = async (index: number, skill: string) => {
+        if (!userId) return;
+
+        // Update local UI state
         setSelectedSkills(prev =>
             prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
         );
 
-        // Animate out the skill
         setSkills(prev => {
             const updated = [...prev];
-            updated[index] = null; // trigger exit animation
+            updated[index] = null;
             return updated;
         });
 
-        // Replace with new skill after animation delay
+        // Replace with new skill after short delay
         setTimeout(() => {
             setSkills(prev => {
                 const updated = [...prev];
@@ -33,7 +37,29 @@ export const SkillSelection = () => {
                 updated[index] = newSkill || '💥';
                 return updated;
             });
-        }, 250); // match exit duration
+        }, 250);
+
+        try {
+            // 👇 GET current skills (optional if you’re tracking it in state)
+            const response = await fetch(`${import.meta.env.VITE_LINK}api/user/${userId}`);
+            const userData = await response.json();
+            const currentSkills = userData.my_skills || [];
+
+            // 👇 Prevent duplicates
+            if (!selectedSkills.includes(skill)) {
+                const newSkills = [...selectedSkills, skill];
+
+                await fetch(`${import.meta.env.VITE_LINK}api/user/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ my_skills: newSkills }),
+                });
+
+                setSelectedSkills(newSkills);
+            }
+        } catch (err) {
+            console.error('❌ Failed to update skills:', err);
+        }
     };
 
     // Rendering function for each row of skills

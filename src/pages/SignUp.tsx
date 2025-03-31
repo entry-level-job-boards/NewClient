@@ -125,6 +125,9 @@ export const SignUp = () => {
 
             const result = await response.json();
             console.log('Account created!', result);
+            if (result.user) {
+                localStorage.setItem('user', JSON.stringify(result.user));
+            }
             alert('Account created successfully!');
             navigate('/skills') // Redirect to Skill Selection page after successful signup
             window.location.reload();
