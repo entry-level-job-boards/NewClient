@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { PasswordRequirements } from '../components/Requirements';
 
@@ -8,6 +8,8 @@ import { encryptData } from '../utils/encrypt.ts';
 export const SignUp = () => {
     const [step, setStep] = useState(0);
     const totalSteps = 5;
+
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -117,7 +119,9 @@ export const SignUp = () => {
             const result = await response.json();
             console.log('Account created!', result);
             alert('Account created successfully!');
+            navigate('/skills') // Redirect to Skill Selection page after successful signup
         } catch (error: any) {
+            console.log(formData); // Log formData for debugging
             console.error('Signup error:', error.message);
             alert(`Error: ${error.message}`);
         }
