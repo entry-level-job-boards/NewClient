@@ -9,6 +9,11 @@ export const SignUp = () => {
     const [step, setStep] = useState(0);
     const totalSteps = 5;
 
+    const backendURL = import.meta.env.VITE_LINK; // Access Vite environment variables
+    if (!backendURL) {
+        console.error('Vite environment variables are not available.');
+    }
+
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -103,7 +108,7 @@ export const SignUp = () => {
         const encrypted = encryptData(submissionData);
 
         try {
-            const response = await fetch('http://localhost:3002/api/create-applicant', {
+            const response = await fetch(`${backendURL}api/create-applicant`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -116,10 +121,13 @@ export const SignUp = () => {
                 throw new Error(errorData.message || 'Failed to create account');
             }
 
+            localStorage.setItem('isLoggedIn', 'true');// Check if user is logged in
+
             const result = await response.json();
             console.log('Account created!', result);
             alert('Account created successfully!');
             navigate('/skills') // Redirect to Skill Selection page after successful signup
+            window.location.reload();
         } catch (error: any) {
             console.log(formData); // Log formData for debugging
             console.error('Signup error:', error.message);

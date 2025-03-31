@@ -9,11 +9,12 @@ export const secureFetch = async (url: string, method: string, data?: any) => {
     };
 
     if (method !== 'GET' && method !== 'HEAD' && data) {
-        const skipEncryption = url.includes('/api/user'); // 👈 customize this however you want
+        const { password, ...rest } = data;
 
-        options.body = skipEncryption
-            ? JSON.stringify(data)
-            : JSON.stringify({ payload: encryptData(data) });
+        options.body = JSON.stringify({
+            payload: encryptData(rest), // Encrypt everything except the password
+            password // Send plaintext password separately
+        });
     }
 
     const response = await fetch(url, options);

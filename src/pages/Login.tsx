@@ -11,6 +11,7 @@ export const Login = () => {
     const [password, setPassword] = useState('');
 
     const [userData, setUserData] = useState<any>(null); // Store user data after login
+    const backendURL = import.meta.env.VITE_LINK;
 
     const navigate = useNavigate();
 
@@ -18,7 +19,8 @@ export const Login = () => {
         e.preventDefault();
 
         try {
-            const data = await secureFetch('http://localhost:3002/api/login', 'POST', {
+            console.log('🔐 Encrypting with key:', import.meta.env.VITE_ENCRYPTION_KEY);
+            const data = await secureFetch(`${backendURL}api/login`, 'POST', {
                 email,
                 password,
             });

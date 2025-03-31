@@ -36,6 +36,7 @@ export const SkillSelection = () => {
         }, 250); // match exit duration
     };
 
+    // Rendering function for each row of skills
     const renderRow = (row: (string | null)[], startIndex: number, rowClass: string) => (
         <>
             <div className={rowClass}>
