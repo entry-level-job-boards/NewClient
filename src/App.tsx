@@ -15,6 +15,7 @@ import { Messages } from './pages/Messages';
 import { Notifications } from './pages/Notifications';
 
 import { LogoutSuccess } from './components/logout-success';
+import { SkillSelection } from './components/SkillSelection';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
 
           <Route path="/logout-success" element={<LogoutSuccess />} />
+          <Route path="/skills" element={<SkillSelection />} />
         </Routes>
         <Chatbot />
       </div>
