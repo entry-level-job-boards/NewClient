@@ -55,26 +55,29 @@ export const BrowseJobs = () => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
     const [isFocused, setIsFocused] = useState(false);
     const suggestionsRef = useRef<HTMLUListElement | null>(null);
+    const isManuallySelecting = useRef(false);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const handleClickOutside = (event: MouseEvent) => {
         if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
             setIsFocused(false);
         }
     }
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsFocused(false);
-            }
-        };
 
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    // useEffect(() => {
+    //     const handleKeyDown = (event: KeyboardEvent) => {
+    //         if (event.key === 'Escape') {
+    //             setIsFocused(false);
+    //         }
+    //     };
+
+    //     document.addEventListener('keydown', handleKeyDown);
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener('keydown', handleKeyDown);
+    //         document.removeEventListener('mousedown', handleClickOutside);
+    //     };
+    // }, []);
 
 
     const handleToggleJob = (jobId: string) => {
@@ -161,7 +164,15 @@ export const BrowseJobs = () => {
                             placeholder="Search by title, company, or location..."
                             value={searchQuery}
                             onFocus={() => setIsFocused(true)}
-                            onBlur={() => setTimeout(() => setIsFocused(false), 150)} // small delay to allow click on suggestion
+                            ref={inputRef}
+                            onBlur={() => {
+                                setTimeout(() => {
+                                    if (!isManuallySelecting.current) {
+                                        setIsFocused(false);
+                                    }
+                                    isManuallySelecting.current = false;
+                                }, 100);
+                            }}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
                                 setActiveSuggestionIndex(-1);
@@ -177,16 +188,33 @@ export const BrowseJobs = () => {
                                     setActiveSuggestionIndex((prev) =>
                                         prev > 0 ? prev - 1 : suggestions.length - 1
                                     );
-                                } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                                } else if (e.key === 'Enter') {
                                     e.preventDefault();
-                                    setSearchQuery(suggestions[activeSuggestionIndex]);
+
+                                    if (activeSuggestionIndex >= 0) {
+                                        // Suggestion was selected with arrow keys
+                                        setSearchQuery(suggestions[activeSuggestionIndex]);
+                                    } else if (searchQuery.trim() !== '') {
+                                        // No suggestion selected, but input has value
+                                        setSearchQuery(searchQuery.trim()); // Trigger filter manually if needed
+                                    }
+
                                     setActiveSuggestionIndex(-1);
                                     setIsFocused(false);
+                                    inputRef.current?.blur();
                                 }
                             }}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
-                        <button className='absolute right-3 top-1/2 transform -translate-y-1/2'><X className='w-4 h-4' /></button>
+                        <button
+                            onClick={() => {
+                                setSearchQuery('');
+                                setIsFocused(true);
+                                inputRef.current?.focus();
+                            }}
+                            className='absolute right-3 top-1/2 transform -translate-y-1/2'>
+                            <X className='w-4 h-4' />
+                        </button>
                         {isFocused && suggestions.length > 0 && (
                             <ul
                                 ref={suggestionsRef}
@@ -196,8 +224,10 @@ export const BrowseJobs = () => {
                                     <li
                                         key={index}
                                         onMouseDown={() => {
+                                            isManuallySelecting.current = true;
                                             setSearchQuery(item);
                                             setActiveSuggestionIndex(-1);
+                                            setIsFocused(false);
                                         }}
                                         className={`px-4 py-2 cursor-pointer text-sm text-gray-700 ${index === activeSuggestionIndex
                                             ? 'bg-indigo-100 text-indigo-800'

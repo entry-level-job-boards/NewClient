@@ -10,12 +10,17 @@ export const secureFetch = async (url: string, method: string, data?: any) => {
     };
 
     if (method !== 'GET' && method !== 'HEAD' && data) {
-        const { password, ...rest } = data;
+        if (method === 'PUT' || method === 'PATCH') {
+            // send as raw JSON
+            options.body = JSON.stringify(data);
+        } else {
+            const { password, ...rest } = data;
 
-        options.body = JSON.stringify({
-            payload: encryptData(rest), // Encrypt everything except the password
-            password // Send plaintext password separately
-        });
+            options.body = JSON.stringify({
+                payload: encryptData(rest),
+                password
+            });
+        }
     }
 
     const response = await fetch(url, options);
@@ -31,6 +36,7 @@ export const secureFetch = async (url: string, method: string, data?: any) => {
         return json;
     } catch (err) {
         console.error('❌ secureFetch decryption error:', err);
-        throw new Error('Decryption failed or response invalid');
+        throw err;
+        // throw new Error('Decryption failed or response invalid');
     }
 };

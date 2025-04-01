@@ -17,11 +17,14 @@ type FormData = {
 };
 
 export const Profile = () => {
+    const [tags, setTags] = useState<string[]>([]);
+    const [newTag, setNewTag] = useState('');
     const [activeTab, setActiveTab] = useState<'profile' | 'applications' | 'settings'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [newSkill, setNewSkill] = useState('');
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
     const [loggedIn, setLoggedIn] = useState<boolean>(() => localStorage.getItem('isLoggedIn') === 'true');
@@ -127,9 +130,11 @@ export const Profile = () => {
             setNewSkill('');
             setSuggestions([]);
             setActiveSuggestionIndex(-1);
+            setErrorMessage('');
             console.log('✅ Skill added and synced to backend');
         } catch (err: any) {
             console.error('❌ Failed to update skills:', err.message);
+            setErrorMessage(err.message);
         }
     };
 
@@ -176,6 +181,12 @@ export const Profile = () => {
             console.log('Deleting account...');
         }
     };
+
+    useEffect(() => {
+        if (newSkill.trim() === '') {
+            setErrorMessage('');
+        }
+    }, [newSkill]);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -498,6 +509,9 @@ export const Profile = () => {
                                                                 </button>
 
                                                             </form>
+                                                            {errorMessage && (
+                                                                <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
