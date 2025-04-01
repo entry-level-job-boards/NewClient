@@ -3,10 +3,7 @@ import { secureFetch } from '../utils/secureFetch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Building, Calendar, DollarSign, ChevronDown, ChevronUp, BadgeCheck, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus } from 'lucide-react';
 import { LoadingSpinner } from '../components/Loading';
-
 import { jobSkills } from '../utils/skills';
-import { use } from 'framer-motion/client';
-
 import { useNavigate } from 'react-router-dom';
 
 type FormData = {

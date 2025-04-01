@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { softSkills } from '../utils/softSkills';
 
@@ -121,6 +122,14 @@ export const SkillSelection = () => {
                 {renderRow(row2, 5, 'grid grid-cols-4 gap-2 justify-center')}
                 {renderRow(row3, 9, 'grid grid-cols-5 gap-3 justify-center mt-6')}
             </div>
+            <Link to="/">
+                <button
+                    className="absolute bottom-[30%] right-[10%] translate-x-[-50%] bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    onClick={() => console.log('Skills submitted:', selectedSkills)}
+                >
+                    Continue
+                </button>
+            </Link>
         </div>
     );
 };

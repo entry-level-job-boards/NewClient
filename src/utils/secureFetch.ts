@@ -5,6 +5,7 @@ export const secureFetch = async (url: string, method: string, data?: any) => {
         method,
         headers: {
             'Content-Type': 'application/json',
+            'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY,
         },
     };
 

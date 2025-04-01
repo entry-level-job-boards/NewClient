@@ -1,12 +1,22 @@
+import { useState, useEffect } from 'react';
 import { Search, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { Chatbot } from './ChatBot';
+import { LoadingSpinner } from './Loading';
+
+import { Jobs } from '../utils/mockJobs';
 
 export const Hero = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+
+
   return (
     <div className="h-screen bg-gradient-to-b from-indigo-50 via-indigo-100 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center pt-20">
+
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,6 +66,7 @@ export const Hero = () => {
             </div>
           </div>
         </motion.div>
+
       </div>
     </div>
   );

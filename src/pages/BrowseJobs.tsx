@@ -1,90 +1,11 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Job } from '../types';
 import { JobCard } from '../components/JobCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 
-const sampleJobs: Job[] = [
-    {
-        id: '1',
-        title: 'Junior Software Developer',
-        company: 'TechStart Solutions',
-        location: 'Remote',
-        description: 'Looking for a passionate developer to join our team. We provide comprehensive training and mentorship to help you grow in your role.',
-        benefits: ['Health Insurance', 'Flexible Hours', 'Learning Budget', 'Remote Work'],
-        deadline: 'March 30, 2024',
-        salary: '$50,000 - $65,000',
-        isRemote: true,
-        skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Git'],
-        postedDate: '2024-02-20',
-        expirationDate: '2024-03-20',
-        tags: ['Backend Developer', 'Full Stack Developer', 'Remote', "Front End Developer"],
-        degree: 'Bachelor\'s Degree',
-    },
-    {
-        id: '2',
-        title: 'Customer Success Associate',
-        company: 'GrowthBase',
-        location: 'New York, NY',
-        description: 'Join our customer success team and help clients achieve their goals. Full training provided for the right candidate.',
-        benefits: ['401(k)', 'Health Benefits', 'Professional Development', 'Team Events'],
-        deadline: 'April 15, 2024',
-        salary: '$45,000 - $55,000',
-        isRemote: false,
-        skills: ['Communication', 'Customer Service', 'Problem Solving', 'MS Office'],
-        postedDate: '2024-02-25',
-        expirationDate: '2024-03-25',
-        tags: ['Customer Service', 'Client Success', 'Customer Support'],
-        degree: 'High School Diploma',
-    },
-    {
-        id: '3',
-        title: 'Marketing Intern',
-        company: 'Creative Minds Agency',
-        location: 'Remote',
-        description: 'Seeking a creative intern to assist with social media campaigns and content creation. No prior experience required.',
-        benefits: ['Remote Work', 'Flexible Schedule', 'Mentorship Program'],
-        deadline: 'May 1, 2024',
-        salary: '$30,000 - $40,000',
-        isRemote: true,
-        skills: ['Social Media', 'Content Creation', 'Graphic Design', 'SEO'],
-        postedDate: '2024-03-01',
-        expirationDate: '2024-04-01',
-        tags: ['Marketing', 'Social Media', 'Content Creation'],
-        degree: 'High School Diploma',
-    },
-    {
-        id: '4',
-        title: 'Data Analyst Trainee',
-        company: 'DataDriven Inc.',
-        location: 'On-site (San Francisco, CA)',
-        description: 'We are looking for a data analyst trainee to join our analytics team. Training will be provided for the right candidate.',
-        benefits: ['Health Insurance', 'Paid Time Off', 'Training Programs'],
-        deadline: 'June 1, 2024',
-        salary: '$55,000 - $70,000',
-        isRemote: false,
-        skills: ['Excel', 'SQL', 'Data Visualization', 'Python'],
-        postedDate: '2024-03-05',
-        expirationDate: '2024-04-05',
-        tags: ['Data Analyst', 'Data Science', 'Trainee'],
-        degree: 'Bachelor\'s Degree',
-    },
-    {
-        id: '5',
-        title: 'Junior Graphic Designer',
-        company: 'Artistic Vision Studio',
-        location: 'Remote',
-        description: 'Passionate about design? Join our team as a junior graphic designer and work on exciting projects with our creative team.',
-        benefits: ['Remote Work', 'Flexible Hours', 'Design Software'],
-        deadline: 'June 15, 2024',
-        salary: '$40,000 - $50,000',
-        isRemote: true,
-        skills: ['Adobe Creative Suite', 'Typography', 'Illustration', 'UI/UX Design'],
-        postedDate: '2024-03-10',
-        expirationDate: '2024-04-10',
-        tags: ['Graphic Design', 'Visual Design', 'Remote', 'Creative'],
-        degree: 'Associate Degree',
-    },
-];
+import { Jobs } from '../utils/mockJobs';
+import { use } from 'framer-motion/client';
+
 
 const salaryRanges = [
     { label: 'All Salaries', min: 0, max: Infinity },
@@ -94,7 +15,34 @@ const salaryRanges = [
     { label: '$75k+', min: 75000, max: Infinity },
 ];
 
+
 export const BrowseJobs = () => {
+
+    const [tags, setTags] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Getting all of the tags and job titles for predicitive text
+    useEffect(() => {
+        const fetchTags = () => {
+            setIsLoading(true);
+
+            const uniqueTags = new Set<string>();
+
+            Jobs.forEach((job) => {
+                job.tags.forEach((tag) => uniqueTags.add(tag));
+                uniqueTags.add(job.title);
+            });
+
+
+            setTags(Array.from(uniqueTags));
+            setIsLoading(false);
+        };
+
+        fetchTags();
+        console.log('Tags:', tags);
+    }, []);
+
+
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLocationType, setSelectedLocationType] = useState<'all' | 'remote' | 'onsite'>('all');
@@ -114,7 +62,7 @@ export const BrowseJobs = () => {
 
     // Filter jobs based on all criteria
     const filteredJobs = useMemo(() => {
-        return sampleJobs.filter(job => {
+        return Jobs.filter(job => {
             // Search query filter
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch =
@@ -163,7 +111,7 @@ export const BrowseJobs = () => {
 
         const uniqueSuggestions = new Set<string>();
 
-        sampleJobs.forEach((job) => {
+        Jobs.forEach((job) => {
             if (job.title.toLowerCase().includes(query)) uniqueSuggestions.add(job.title);
             if (job.company.toLowerCase().includes(query)) uniqueSuggestions.add(job.company);
             if (job.location.toLowerCase().includes(query)) uniqueSuggestions.add(job.location);
