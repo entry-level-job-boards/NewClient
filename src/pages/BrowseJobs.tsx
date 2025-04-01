@@ -56,6 +56,27 @@ export const BrowseJobs = () => {
     const [isFocused, setIsFocused] = useState(false);
     const suggestionsRef = useRef<HTMLUListElement | null>(null);
 
+    const handleClickOutside = (event: MouseEvent) => {
+        if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+            setIsFocused(false);
+        }
+    }
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsFocused(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+
     const handleToggleJob = (jobId: string) => {
         setExpandedJobId(prev => (prev === jobId ? null : jobId));
     };
@@ -69,7 +90,9 @@ export const BrowseJobs = () => {
                 job.title.toLowerCase().includes(searchLower) ||
                 job.company.toLowerCase().includes(searchLower) ||
                 job.location.toLowerCase().includes(searchLower) ||
-                job.description.toLowerCase().includes(searchLower);
+                job.description.toLowerCase().includes(searchLower) ||
+                job.skills.some((skill) => skill.toLowerCase().includes(searchLower)) ||
+                job.tags.some((tag) => tag.toLowerCase().includes(searchLower));
 
             // Location type filter
             const matchesLocationType =
@@ -115,6 +138,12 @@ export const BrowseJobs = () => {
             if (job.title.toLowerCase().includes(query)) uniqueSuggestions.add(job.title);
             if (job.company.toLowerCase().includes(query)) uniqueSuggestions.add(job.company);
             if (job.location.toLowerCase().includes(query)) uniqueSuggestions.add(job.location);
+            if (job.skills.some(skill => skill.toLowerCase().includes(query))) {
+                job.skills.forEach(skill => uniqueSuggestions.add(skill));
+            }
+            if (job.tags.some(tag => tag.toLowerCase().includes(query))) {
+                job.tags.forEach(tag => uniqueSuggestions.add(tag));
+            }
         });
 
         return Array.from(uniqueSuggestions).slice(0, 5); // limit to 5 suggestions
@@ -152,10 +181,12 @@ export const BrowseJobs = () => {
                                     e.preventDefault();
                                     setSearchQuery(suggestions[activeSuggestionIndex]);
                                     setActiveSuggestionIndex(-1);
+                                    setIsFocused(false);
                                 }
                             }}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
+                        <button className='absolute right-3 top-1/2 transform -translate-y-1/2'><X className='w-4 h-4' /></button>
                         {isFocused && suggestions.length > 0 && (
                             <ul
                                 ref={suggestionsRef}
