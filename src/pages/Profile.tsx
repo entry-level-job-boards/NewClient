@@ -15,6 +15,10 @@ type FormData = {
 };
 
 export const Profile = () => {
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState('');
+    const [tagError, setTagError] = useState('');
+
     const [activeTab, setActiveTab] = useState<'profile' | 'applications' | 'settings'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [newSkill, setNewSkill] = useState('');
@@ -156,6 +160,25 @@ export const Profile = () => {
         }
     };
 
+    const handleAddTag = (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = tagInput.trim();
+
+        if (!trimmed) return;
+        if (tags.includes(trimmed)) {
+            setTagError('Tag already added');
+            return;
+        }
+
+        setTags(prev => [...prev, trimmed]);
+        setTagInput('');
+        setTagError('');
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        setTags(prev => prev.filter(tag => tag !== tagToRemove));
+    };
+
     const handleSaveChanges = () => {
         // Here you would typically make an API call to update the user's profile
         console.log('Saving profile changes:', formData);
@@ -251,6 +274,7 @@ export const Profile = () => {
                         </div>
                     ) : (
                         <div className="flex-1">
+
                             {activeTab === 'profile' && (
                                 <div className="bg-white rounded-2xl shadow-lg">
                                     <div className="relative h-32 bg-gradient-to-r from-indigo-500 to-purple-500">
@@ -382,131 +406,178 @@ export const Profile = () => {
                                                         </span>
                                                     ))}
                                                     {isEditing && (
+                                                        <>
+                                                            <div className="w-full relative overflow-visible z-10">
 
-                                                        <div className="w-full relative overflow-visible z-10">
+                                                                {/* Add Skill Section */}
+                                                                <form onSubmit={handleAddSkill} className="flex">
+                                                                    <div className="relative w-full">
 
-                                                            {/* Add Skill Section */}
-                                                            <form onSubmit={handleAddSkill} className="flex">
-                                                                <div className="relative w-full">
+                                                                        {/* Skills Input */}
+                                                                        <input
+                                                                            type="text"
+                                                                            value={newSkill}
+                                                                            onChange={(e) => {
+                                                                                const input = e.target.value;
+                                                                                setNewSkill(input);
 
-                                                                    {/* Skills Input */}
-                                                                    <input
-                                                                        type="text"
-                                                                        value={newSkill}
-                                                                        onChange={(e) => {
-                                                                            const input = e.target.value;
-                                                                            setNewSkill(input);
-
-                                                                            if (input.length > 0) {
-                                                                                const matches = jobSkills
-                                                                                    .filter(skill =>
-                                                                                        skill.toLowerCase().startsWith(input.toLowerCase())
-                                                                                    )
-                                                                                    .slice(0, 5);
-                                                                                setSuggestions(matches);
-                                                                            } else {
-                                                                                setSuggestions([]);
-                                                                            }
-                                                                        }}
-                                                                        onKeyDown={(e) => {
-                                                                            if (e.key === 'ArrowDown') {
-                                                                                e.preventDefault();
-                                                                                setActiveSuggestionIndex(prev => {
-                                                                                    const next = prev < suggestions.length - 1 ? prev + 1 : 0;
-                                                                                    setNewSkill(suggestions[next] || '');
-                                                                                    return next;
-                                                                                });
-                                                                            } else if (e.key === 'ArrowUp') {
-                                                                                e.preventDefault();
-                                                                                setActiveSuggestionIndex(prev => {
-                                                                                    const next = prev > 0 ? prev - 1 : suggestions.length - 1;
-                                                                                    setNewSkill(suggestions[next] || '');
-                                                                                    return next;
-                                                                                });
-                                                                            } else if (e.key === 'Enter') {
-                                                                                e.preventDefault();
-
-                                                                                // Use selected suggestion if available, else fall back to user input
-                                                                                const skillToAdd = activeSuggestionIndex >= 0
-                                                                                    ? suggestions[activeSuggestionIndex]
-                                                                                    : newSkill.trim();
-
-                                                                                if (skillToAdd) {
-                                                                                    // Set input manually and let handleAddSkill use it
-                                                                                    setNewSkill(skillToAdd);
-
-                                                                                    // Submit the form to trigger handleAddSkill
-                                                                                    const form = e.currentTarget.closest('form');
-                                                                                    if (form) {
-                                                                                        form.requestSubmit();
-                                                                                    }
+                                                                                if (input.length > 0) {
+                                                                                    const matches = jobSkills
+                                                                                        .filter(skill =>
+                                                                                            skill.toLowerCase().startsWith(input.toLowerCase())
+                                                                                        )
+                                                                                        .slice(0, 5);
+                                                                                    setSuggestions(matches);
+                                                                                } else {
+                                                                                    setSuggestions([]);
                                                                                 }
+                                                                            }}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'ArrowDown') {
+                                                                                    e.preventDefault();
+                                                                                    setActiveSuggestionIndex(prev => {
+                                                                                        const next = prev < suggestions.length - 1 ? prev + 1 : 0;
+                                                                                        setNewSkill(suggestions[next] || '');
+                                                                                        return next;
+                                                                                    });
+                                                                                } else if (e.key === 'ArrowUp') {
+                                                                                    e.preventDefault();
+                                                                                    setActiveSuggestionIndex(prev => {
+                                                                                        const next = prev > 0 ? prev - 1 : suggestions.length - 1;
+                                                                                        setNewSkill(suggestions[next] || '');
+                                                                                        return next;
+                                                                                    });
+                                                                                } else if (e.key === 'Enter') {
+                                                                                    e.preventDefault();
 
-                                                                                setSuggestions([]);
-                                                                                setActiveSuggestionIndex(-1);
-                                                                            } else if (e.key === 'Escape') {
-                                                                                setSuggestions([]);
-                                                                                setActiveSuggestionIndex(-1);
-                                                                            }
-                                                                        }}
-                                                                        onFocus={() => {
-                                                                            if (newSkill.trim().length > 0) {
-                                                                                const matches = jobSkills
-                                                                                    .filter(skill =>
-                                                                                        skill.toLowerCase().startsWith(newSkill.toLowerCase())
-                                                                                    )
-                                                                                    .slice(0, 5);
-                                                                                setSuggestions(matches);
-                                                                            }
-                                                                        }}
-                                                                        onBlur={() => {
-                                                                            setTimeout(() => {
-                                                                                setSuggestions([]);
-                                                                            }, 100);
-                                                                        }}
-                                                                        placeholder="Add a skill..."
-                                                                        className="px-3 py-1 border border-gray-300 rounded-l-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
-                                                                    />
+                                                                                    // Use selected suggestion if available, else fall back to user input
+                                                                                    const skillToAdd = activeSuggestionIndex >= 0
+                                                                                        ? suggestions[activeSuggestionIndex]
+                                                                                        : newSkill.trim();
 
-                                                                    {/* Suggestions Dropdown */}
-                                                                    {suggestions.length > 0 && (
-                                                                        <ul className="absolute left-0 top-full z-[999] bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-lg max-h-60 overflow-y-auto">
-                                                                            {suggestions.map((suggestion, index) => (
-                                                                                <li
-                                                                                    key={index}
-                                                                                    onMouseDown={() => {
-                                                                                        setFormData(prev => ({
-                                                                                            ...prev,
-                                                                                            skills: [...prev.skills, suggestion]
-                                                                                        }));
-                                                                                        setNewSkill('');
-                                                                                        setSuggestions([]);
-                                                                                        setActiveSuggestionIndex(-1);
-                                                                                    }}
-                                                                                    className={`px-4 py-2 cursor-pointer text-sm ${index === activeSuggestionIndex
-                                                                                        ? 'bg-indigo-100 text-indigo-800'
-                                                                                        : 'hover:bg-indigo-50'
-                                                                                        }`}
-                                                                                >
-                                                                                    {suggestion}
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    )}
+                                                                                    if (skillToAdd) {
+                                                                                        // Set input manually and let handleAddSkill use it
+                                                                                        setNewSkill(skillToAdd);
+
+                                                                                        // Submit the form to trigger handleAddSkill
+                                                                                        const form = e.currentTarget.closest('form');
+                                                                                        if (form) {
+                                                                                            form.requestSubmit();
+                                                                                        }
+                                                                                    }
+
+                                                                                    setSuggestions([]);
+                                                                                    setActiveSuggestionIndex(-1);
+                                                                                } else if (e.key === 'Escape') {
+                                                                                    setSuggestions([]);
+                                                                                    setActiveSuggestionIndex(-1);
+                                                                                }
+                                                                            }}
+                                                                            onFocus={() => {
+                                                                                if (newSkill.trim().length > 0) {
+                                                                                    const matches = jobSkills
+                                                                                        .filter(skill =>
+                                                                                            skill.toLowerCase().startsWith(newSkill.toLowerCase())
+                                                                                        )
+                                                                                        .slice(0, 5);
+                                                                                    setSuggestions(matches);
+                                                                                }
+                                                                            }}
+                                                                            onBlur={() => {
+                                                                                setTimeout(() => {
+                                                                                    setSuggestions([]);
+                                                                                }, 100);
+                                                                            }}
+                                                                            placeholder="Add a skill..."
+                                                                            className="px-3 py-1 border border-gray-300 rounded-l-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+                                                                        />
+
+                                                                        {/* Suggestions Dropdown */}
+                                                                        {suggestions.length > 0 && (
+                                                                            <ul className="absolute left-0 top-full z-[999] bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-lg max-h-60 overflow-y-auto">
+                                                                                {suggestions.map((suggestion, index) => (
+                                                                                    <li
+                                                                                        key={index}
+                                                                                        onMouseDown={() => {
+                                                                                            setFormData(prev => ({
+                                                                                                ...prev,
+                                                                                                skills: [...prev.skills, suggestion]
+                                                                                            }));
+                                                                                            setNewSkill('');
+                                                                                            setSuggestions([]);
+                                                                                            setActiveSuggestionIndex(-1);
+                                                                                        }}
+                                                                                        className={`px-4 py-2 cursor-pointer text-sm ${index === activeSuggestionIndex
+                                                                                            ? 'bg-indigo-100 text-indigo-800'
+                                                                                            : 'hover:bg-indigo-50'
+                                                                                            }`}
+                                                                                    >
+                                                                                        {suggestion}
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="px-3 py-1 bg-indigo-600 text-white rounded-r-full text-sm hover:bg-indigo-700"
+                                                                    >
+                                                                        <Plus className="h-4 w-4" />
+                                                                    </button>
+
+                                                                </form>
+
+                                                                {errorMessage && (
+                                                                    <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Tags Section */}
+                                                            {/* Only show in edit mode */}
+                                                            <div className="md:col-span-2 mt-4">
+                                                                <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                                                <div className="flex flex-wrap gap-2 mt-4">
+                                                                    {tags.map((tag, idx) => (
+                                                                        <span
+                                                                            key={idx}
+                                                                            className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm flex items-center"
+                                                                        >
+                                                                            {tag}
+                                                                            <button
+                                                                                onClick={() => handleRemoveTag(tag)}
+                                                                                className="ml-2 text-indigo-600 hover:text-indigo-800"
+                                                                            >
+                                                                                <X className="w-4 h-4" />
+                                                                            </button>
+                                                                        </span>
+                                                                    ))}
                                                                 </div>
 
-                                                                <button
-                                                                    type="submit"
-                                                                    className="px-3 py-1 bg-indigo-600 text-white rounded-r-full text-sm hover:bg-indigo-700"
-                                                                >
-                                                                    <Plus className="h-4 w-4" />
-                                                                </button>
-
-                                                            </form>
-                                                            {errorMessage && (
-                                                                <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
-                                                            )}
-                                                        </div>
+                                                                {/* Tag Input */}
+                                                                <form onSubmit={handleAddTag}>
+                                                                    <div className="flex gap-2">
+                                                                        <input
+                                                                            type="text"
+                                                                            value={tagInput}
+                                                                            onChange={(e) => {
+                                                                                setTagInput(e.target.value);
+                                                                                if (e.target.value.trim() === '') setTagError('');
+                                                                            }}
+                                                                            placeholder="Add a tag..."
+                                                                            className="flex-1 px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                                                        />
+                                                                        <button
+                                                                            type="submit"
+                                                                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                                        >
+                                                                            Add
+                                                                        </button>
+                                                                    </div>
+                                                                    {tagError && <p className="text-red-500 mt-1 text-sm">{tagError}</p>}
+                                                                </form>
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>

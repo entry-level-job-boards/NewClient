@@ -56,11 +56,11 @@ export const BrowseJobs = () => {
     const isManuallySelecting = useRef(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleClickOutside = (event: MouseEvent) => {
-        if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
-            setIsFocused(false);
-        }
-    }
+    // const handleClickOutside = (event: MouseEvent) => {
+    //     if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+    //         setIsFocused(false);
+    //     }
+    // }
 
     const handleToggleJob = (jobId: string) => {
         setExpandedJobId(prev => (prev === jobId ? null : jobId));

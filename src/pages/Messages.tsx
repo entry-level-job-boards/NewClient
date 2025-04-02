@@ -64,6 +64,9 @@ export const Messages = () => {
     const [messages, setMessages] = useState<Message[]>(sampleMessages);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+    const [formattedDate, setFormattedDate] = useState<string>('');
+    const [formattedTime, setFormattedTime] = useState<string>('');
+
     const messageRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const [replyInput, setReplyInput] = useState('');
