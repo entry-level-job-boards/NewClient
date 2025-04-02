@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { secureFetch } from '../utils/secureFetch';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Phone, MapPin, Building, Calendar, DollarSign, ChevronDown, ChevronUp, BadgeCheck, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus } from 'lucide-react';
 import { LoadingSpinner } from '../components/Loading';
 import { jobSkills } from '../utils/skills';
-import { useNavigate } from 'react-router-dom';
 
 type FormData = {
     name: string;
@@ -17,8 +15,6 @@ type FormData = {
 };
 
 export const Profile = () => {
-    const [tags, setTags] = useState<string[]>([]);
-    const [newTag, setNewTag] = useState('');
     const [activeTab, setActiveTab] = useState<'profile' | 'applications' | 'settings'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [newSkill, setNewSkill] = useState('');
@@ -37,8 +33,6 @@ export const Profile = () => {
         skills: [],
         education: '',
     });
-
-    const navigate = useNavigate();
 
     const [notifications, setNotifications] = useState({
         email: true,
