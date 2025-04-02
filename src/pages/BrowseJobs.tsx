@@ -1,10 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Job } from '../types';
 import { JobCard } from '../components/JobCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-
 import { Jobs } from '../utils/mockJobs';
-import { use } from 'framer-motion/client';
+
 
 
 const salaryRanges = [
@@ -63,22 +61,6 @@ export const BrowseJobs = () => {
             setIsFocused(false);
         }
     }
-
-    // useEffect(() => {
-    //     const handleKeyDown = (event: KeyboardEvent) => {
-    //         if (event.key === 'Escape') {
-    //             setIsFocused(false);
-    //         }
-    //     };
-
-    //     document.addEventListener('keydown', handleKeyDown);
-    //     document.addEventListener('mousedown', handleClickOutside);
-    //     return () => {
-    //         document.removeEventListener('keydown', handleKeyDown);
-    //         document.removeEventListener('mousedown', handleClickOutside);
-    //     };
-    // }, []);
-
 
     const handleToggleJob = (jobId: string) => {
         setExpandedJobId(prev => (prev === jobId ? null : jobId));
