@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { softSkills } from '../utils/softSkills';
 
+import { secureFetch } from '../utils/secureFetch';
+
 export const SkillSelection = () => {
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [skills, setSkills] = useState<(string | null)[]>([]); // Track per slot
 
     const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
+
 
     useEffect(() => {
         const shuffled = [...softSkills].sort(() => Math.random() - 0.5).slice(0, 14);
@@ -42,18 +45,15 @@ export const SkillSelection = () => {
 
         try {
             // 👇 GET current skills (optional if you’re tracking it in state)
-            const response = await fetch(`${import.meta.env.VITE_LINK}api/user/${userId}`);
-            const userData = await response.json();
+            const userData = await secureFetch(`${import.meta.env.VITE_LINK}api/user/${userId}`, 'GET');
             const currentSkills = userData.my_skills || [];
 
             // 👇 Prevent duplicates
             if (!selectedSkills.includes(skill)) {
                 const newSkills = [...selectedSkills, skill];
 
-                await fetch(`${import.meta.env.VITE_LINK}api/user/${userId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ my_skills: newSkills }),
+                await secureFetch(`${import.meta.env.VITE_LINK}api/user/${userId}`, 'PUT', {
+                    my_skills: [...currentSkills, skill],
                 });
 
                 setSelectedSkills(newSkills);

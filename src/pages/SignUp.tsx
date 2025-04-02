@@ -112,6 +112,7 @@ export const SignUp = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY
                 },
                 body: JSON.stringify({ payload: encrypted }), // send encrypted data as "payload"
             });

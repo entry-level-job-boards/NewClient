@@ -3,6 +3,7 @@ import { secureFetch } from '../utils/secureFetch';
 import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus } from 'lucide-react';
 import { LoadingSpinner } from '../components/Loading';
 import { jobSkills } from '../utils/skills';
+import { form } from 'framer-motion/client';
 
 type FormData = {
     name: string;
@@ -12,6 +13,15 @@ type FormData = {
     bio: string;
     skills: string[];
     education: string;
+    day: string;
+    month: string;
+    year: string;
+    city: string;
+    state: string;
+    hide_phone: boolean;
+    my_portfolio: string;
+    email_notifications: boolean;
+    text_notifications: boolean;
 };
 
 export const Profile = () => {
@@ -36,12 +46,25 @@ export const Profile = () => {
         bio: '',
         skills: [],
         education: '',
+        day: '',
+        month: '',
+        year: '',
+        city: '',
+        state: '',
+        hide_phone: false,
+        my_portfolio: '',
+        email_notifications: false,
+        text_notifications: false,
     });
 
     const [notifications, setNotifications] = useState({
         email: true,
         push: false,
     });
+
+    const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
+    const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const isOwner = userData?.id === loggedInUser?.id;
 
     const mockApplications = [
         {
@@ -81,6 +104,15 @@ export const Profile = () => {
                 bio: response.about_me || '',
                 skills: response.my_skills || [],
                 education: response.education?.[0]?.degree || '',
+                day: response.day,
+                month: response.month,
+                year: response.year,
+                city: response.city,
+                state: response.state,
+                hide_phone: response.hide_phone || false,
+                my_portfolio: response.my_portfolio || '',
+                email_notifications: response.email_notifications || false,
+                text_notifications: response.text_notifications || false,
             });
 
             setLoading(false); // ✅ Done loading
@@ -192,6 +224,23 @@ export const Profile = () => {
         }));
     };
 
+    const handlePhoneToggle = async () => {
+        setFormData(prev => ({
+            ...prev,
+            hide_phone: !prev.hide_phone
+        }));
+
+        try {
+            const userData = await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', {
+                hide_phone: !formData.hide_phone
+            });
+        }
+        catch (err: any) {
+            console.error('❌ Failed to update phone visibility:', err.message);
+            alert('Failed to update phone visibility');
+        }
+    };
+
     const handleDeleteAccount = () => {
         if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
             // Here you would typically make an API call to delete the user's account
@@ -293,15 +342,24 @@ export const Profile = () => {
                                                 <h2 className="text-2xl font-bold text-gray-900">{formData.name}</h2>
                                                 <p className="text-gray-600">{formData.education}</p>
                                             </div>
-                                            <button
-                                                onClick={() => isEditing ? handleSaveChanges() : setIsEditing(true)}
-                                                className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
-                                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                    : 'text-indigo-600 hover:bg-indigo-50'
-                                                    }`}
-                                            >
-                                                {isEditing ? 'Save Changes' : 'Edit Profile'}
-                                            </button>
+                                            {isOwner ? (
+                                                <button
+                                                    onClick={() => isEditing ? handleSaveChanges() : setIsEditing(true)}
+                                                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
+                                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                        : 'text-indigo-600 hover:bg-indigo-50'
+                                                        }`}
+                                                >
+                                                    {isEditing ? 'Save Changes' : 'Edit Profile'}
+                                                </button>
+                                            ) :
+                                                <button
+                                                    onClick={() => setActiveTab('settings')}
+                                                    className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+                                                >
+                                                    Message
+                                                </button>
+                                            }
                                         </div>
 
 
@@ -341,7 +399,13 @@ export const Profile = () => {
                                                     ) : (
                                                         <div className="flex items-center text-gray-900">
                                                             <Phone className="h-5 w-5 text-gray-400 mr-2" />
-                                                            <p>{formData.phone}</p>
+                                                            {
+                                                                formData.hide_phone
+                                                                    ? <p>(***) ***-****</p>
+                                                                    : <p>{formData.phone}</p>
+
+                                                            }
+
                                                         </div>
                                                     )}
                                                 </div>
@@ -653,6 +717,23 @@ export const Profile = () => {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div className="space-y-6" >
+                                            <h3 className="text-lg font-medium text-gray-900 mb-4">Privacy</h3>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <Phone className="h-5 w-5 text-gray-400 mr-2" />
+                                                    <span>Hide Phone</span>
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.hide_phone}
+                                                    onChange={() => handlePhoneToggle()}
+                                                    className="w-6 h-6 rounded-md border border-gray-300"
+                                                />
+                                            </div>
+                                        </div>
+
                                         <div>
                                             <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Account</h3>
                                             <p className="text-gray-600">Permanently delete your account and all associated data.</p>
@@ -665,6 +746,7 @@ export const Profile = () => {
                                         </div>
                                     </div>
                                 </div>
+
                             )}
                         </div>
                     )}
