@@ -6,6 +6,7 @@ import { jobSkills } from '../utils/skills';
 import { form } from 'framer-motion/client';
 
 type FormData = {
+    user_image: File | null;
     name: string;
     email: string;
     phone: string;
@@ -29,6 +30,8 @@ export const Profile = () => {
     const [tagInput, setTagInput] = useState('');
     const [tagError, setTagError] = useState('');
 
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
     const [activeTab, setActiveTab] = useState<'profile' | 'applications' | 'settings'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [newSkill, setNewSkill] = useState('');
@@ -39,6 +42,7 @@ export const Profile = () => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
     const [loggedIn, setLoggedIn] = useState<boolean>(() => localStorage.getItem('isLoggedIn') === 'true');
     const [formData, setFormData] = useState<FormData>({
+        user_image: null,
         name: '',
         email: '',
         phone: '',
@@ -97,6 +101,7 @@ export const Profile = () => {
 
             setUserData(response);
             setFormData({
+                user_image: response.user_image || null,
                 name: `${response.first_name} ${response.last_name}`,
                 email: response.email,
                 phone: response.phone_number || '',
@@ -126,6 +131,16 @@ export const Profile = () => {
     useEffect(() => {
         getUserDetails();
     }, []);
+
+    // Handle Images Upload
+    const handleImageUpload = async (file: File) => {
+        const formData = new FormData();
+        formData.append('user_image', file);
+
+        const response = await secureFetch(`http://localhost:3002/api/user/${userId}/`, 'PUT', formData);
+
+        console.log('Image uploaded successfully:', response);
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -330,7 +345,43 @@ export const Profile = () => {
                                         <div className="absolute -bottom-16 left-6">
                                             <div className="bg-white p-4 rounded-2xl shadow-lg">
                                                 <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl p-3">
-                                                    <User className="h-12 w-12 text-indigo-600" />
+                                                    {formData.user_image ? (
+                                                        <img
+                                                            src={`http://localhost:3002${formData.user_image}`}
+                                                            alt="Profile"
+                                                            className="h-12 w-12 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <User className="h-12 w-12 text-indigo-600" />
+                                                    )}
+
+                                                    {isOwner && isEditing && (
+                                                        <>
+                                                            <input
+                                                                id="profile-image-upload"
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) {
+                                                                        setFormData(prev => ({
+                                                                            ...prev,
+                                                                            user_image: file,
+                                                                        }));
+                                                                        setSelectedFile(file); // optional if you're uploading on submit
+                                                                    }
+                                                                }}
+                                                                className="hidden"
+                                                            />
+
+                                                            <label
+                                                                htmlFor="profile-image-upload"
+                                                                className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                                                            >
+                                                                Change Image
+                                                            </label>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -731,6 +782,15 @@ export const Profile = () => {
                                                     onChange={() => handlePhoneToggle()}
                                                     className="w-6 h-6 rounded-md border border-gray-300"
                                                 />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6" >
+                                            <h3 className="text-lg font-medium text-gray-900 mb-4">Account</h3>
+                                            <div className="flex items-center justify-between">
+                                                <button className='w-full flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors'>
+                                                    <p>Become an Employer</p>
+                                                </button>
                                             </div>
                                         </div>
 

@@ -1,7 +1,7 @@
 export const faqData = [
     {
         question: "How do I post a job?",
-        answer: "Click the 'Post a Job' button at the top of the page. Fill in the form with the job details, then hit submit."
+        answer: "You must be a registered company through us which you can do through the settings in your profile. Click the 'Post a Job' button at the top of the page. Fill in the form with the job details, then hit submit."
     },
     {
         question: "Can I edit a job after posting?",
