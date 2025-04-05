@@ -120,6 +120,8 @@ export const Profile = () => {
                 text_notifications: response.text_notifications || false,
             });
 
+            console.log('✅ User data fetched successfully:', response);
+
             setLoading(false); // ✅ Done loading
         } catch (err: any) {
             console.error('❌ Failed to fetch user data:', err.message);
@@ -137,10 +139,36 @@ export const Profile = () => {
         const formData = new FormData();
         formData.append('user_image', file);
 
-        const response = await secureFetch(`http://localhost:3002/api/user/${userId}/`, 'PUT', formData);
+        try {
+            const response = await fetch(`http://localhost:3002/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY!
+                    // ❌ Do NOT set Content-Type manually here or it will break FormData
+                },
+                body: formData,
+            });
 
-        console.log('Image uploaded successfully:', response);
-    }
+            if (!response.ok) {
+                const text = await response.text(); // fallback in case it's HTML
+                throw new Error(`Upload failed: ${text}`);
+            }
+
+            const data = await response.json();
+
+            console.log('✅ Image uploaded successfully:', data);
+
+            setFormData(prev => ({
+                ...prev,
+                user_image: data.user_image
+            }));
+
+            setSelectedFile(null);
+        } catch (err: any) {
+            console.error('❌ Image upload error:', err.message);
+            alert(err.message);
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -226,10 +254,59 @@ export const Profile = () => {
         setTags(prev => prev.filter(tag => tag !== tagToRemove));
     };
 
-    const handleSaveChanges = () => {
-        // Here you would typically make an API call to update the user's profile
-        console.log('Saving profile changes:', formData);
-        setIsEditing(false);
+    const handleSaveChanges = async () => {
+        const form = new FormData();
+
+        const [first_name, ...lastNameParts] = formData.name.trim().split(' ');
+        const last_name = lastNameParts.join(' ');
+
+        form.append('first_name', first_name);
+        form.append('last_name', last_name);
+        form.append('email', formData.email);
+        form.append('phone_number', formData.phone);
+        form.append('city', formData.city);
+        form.append('state', formData.state);
+        form.append('about_me', formData.bio);
+        form.append('my_portfolio', formData.my_portfolio);
+        form.append('hide_phone', formData.hide_phone.toString());
+        form.append('email_notifications', formData.email_notifications.toString());
+        form.append('text_notifications', formData.text_notifications.toString());
+
+        formData.skills.forEach((skill, index) => {
+            form.append(`my_skills[${index}]`, skill);
+        });
+
+        if (selectedFile) {
+            form.append('user_image', selectedFile);
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3002/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY!
+                },
+                body: form
+            });
+
+            const contentType = response.headers.get('content-type');
+
+            if (!response.ok) {
+                const errorText = contentType?.includes('application/json')
+                    ? await response.json()
+                    : await response.text(); // fallback for HTML error pages
+                throw new Error(errorText.message || errorText || 'Update failed');
+            }
+
+            const result = await response.json();
+
+            setFormData(prev => ({ ...prev, user_image: result.user_image }));
+            setSelectedFile(null);
+            setIsEditing(false);
+        } catch (err: any) {
+            console.error('❌ Failed to save changes:', err.message);
+            alert(err.message);
+        }
     };
 
     const handleNotificationChange = (type: 'email' | 'push') => {
@@ -260,6 +337,14 @@ export const Profile = () => {
         if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
             // Here you would typically make an API call to delete the user's account
             console.log('Deleting account...');
+        }
+    };
+
+    const handleClick = () => {
+        if (isEditing) {
+            handleSaveChanges();
+        } else {
+            setIsEditing(true);
         }
     };
 
@@ -340,19 +425,19 @@ export const Profile = () => {
                         <div className="flex-1">
 
                             {activeTab === 'profile' && (
-                                <div className="bg-white rounded-2xl shadow-lg">
+                                <div className="bg-transparent rounded-2xl shadow-lg">
                                     <div className="relative h-32 bg-gradient-to-r from-indigo-500 to-purple-500">
                                         <div className="absolute -bottom-16 left-6">
-                                            <div className="bg-white p-4 rounded-2xl shadow-lg">
-                                                <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl p-3">
+                                            <div className="bg-white rounded-2xl shadow-lg">
+                                                <div className="relative h-32 w-32 overflow-hidden">
                                                     {formData.user_image ? (
                                                         <img
                                                             src={`http://localhost:3002${formData.user_image}`}
                                                             alt="Profile"
-                                                            className="h-12 w-12 rounded-full object-cover"
+                                                            className="absolute inset-0 rounded-[15px] w-full h-full object-cover "
                                                         />
                                                     ) : (
-                                                        <User className="h-12 w-12 text-indigo-600" />
+                                                        <User className="w-full h-full text-indigo-600" />
                                                     )}
 
                                                     {isOwner && isEditing && (
@@ -368,7 +453,7 @@ export const Profile = () => {
                                                                             ...prev,
                                                                             user_image: file,
                                                                         }));
-                                                                        setSelectedFile(file); // optional if you're uploading on submit
+                                                                        setSelectedFile(file);
                                                                     }
                                                                 }}
                                                                 className="hidden"
@@ -376,7 +461,7 @@ export const Profile = () => {
 
                                                             <label
                                                                 htmlFor="profile-image-upload"
-                                                                className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                                                                className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-sm font-medium rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
                                                             >
                                                                 Change Image
                                                             </label>
@@ -394,15 +479,25 @@ export const Profile = () => {
                                                 <p className="text-gray-600">{formData.education}</p>
                                             </div>
                                             {isOwner ? (
-                                                <button
-                                                    onClick={() => isEditing ? handleSaveChanges() : setIsEditing(true)}
-                                                    className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
-                                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                        : 'text-indigo-600 hover:bg-indigo-50'
-                                                        }`}
-                                                >
-                                                    {isEditing ? 'Save Changes' : 'Edit Profile'}
-                                                </button>
+                                                <div className='flex gap-2'>
+                                                    {isEditing && (
+                                                        <button
+                                                            onClick={() => setIsEditing(false)}
+                                                            className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={handleClick}
+                                                        className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
+                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                            : 'text-indigo-600 hover:bg-indigo-50'
+                                                            }`}
+                                                    >
+                                                        {isEditing ? 'Save Changes' : 'Edit Profile'}
+                                                    </button>
+                                                </div>
                                             ) :
                                                 <button
                                                     onClick={() => setActiveTab('settings')}
@@ -485,13 +580,19 @@ export const Profile = () => {
 
                                             {/* Bio Section */}
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                                <div className='flex justify-between'>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                                    <p className="text-sm text-gray-500 text-right">
+                                                        {formData.bio.length}/500 characters
+                                                    </p>
+                                                </div>
                                                 {isEditing ? (
                                                     <textarea
                                                         name="bio"
                                                         value={formData.bio}
                                                         onChange={handleInputChange}
                                                         rows={4}
+                                                        maxLength={500}
                                                         className="block w-full px-3 py-2 border border-gray-300 rounded-md"
                                                     />
                                                 ) : (
@@ -812,6 +913,6 @@ export const Profile = () => {
                     )}
                 </div>
             </div >
-        </div>
+        </div >
     );
 }
