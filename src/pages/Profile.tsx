@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { secureFetch } from '../utils/secureFetch';
-import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus, Pencil, Globe, Linkedin, Github, Instagram, Facebook, Dribbble } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus, Pencil, Globe } from 'lucide-react';
+import { FaLinkedin, FaGithub, FaInstagram, FaFacebook, FaDribbble } from 'react-icons/fa';
 import { LoadingSpinner } from '../components/Loading';
 import { jobSkills } from '../utils/skills';
 import { form } from 'framer-motion/client';
 import { Link } from 'react-router-dom';
 
 import { PriorJobs } from '../components/PriorJobs';
+import { Education } from '../components/Education';
 
 import { States } from '../utils/states';
 
@@ -79,13 +81,16 @@ export const Profile = () => {
         push: false,
     });
 
-    const websiteIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-        LinkedIn: Linkedin,
-        GitHub: Github,
-        Portfolio: Globe,
-        Instagram: Instagram,
-        Facebook: Facebook,
-        Dribbble: Dribbble,
+    const GitHubIcon = () => <FaGithub className='mr-2 w-5' />;
+
+
+    const websiteIconMap: Record<string, React.FC<any>> = {
+        LinkedIn: FaLinkedin,
+        Github: FaGithub,
+        Instagram: FaInstagram,
+        Facebook: FaFacebook,
+        Dribbble: FaDribbble,
+        Portfolio: (props) => <Globe className="h-5 w-5" {...props} />,
     };
 
     const mockApplications = [
@@ -1008,6 +1013,10 @@ export const Profile = () => {
 
                                     <div className='mt-7'>
                                         <PriorJobs handleSaveChanges={handleSaveChanges} isEditing={isEditing} isOwner={isOwner} userData={userData} />
+                                    </div>
+
+                                    <div className='mt-7'>
+                                        <Education handleSaveChanges={handleSaveChanges} userData={userData} />
                                     </div>
                                 </>
                             )}
