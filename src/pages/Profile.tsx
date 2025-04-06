@@ -33,6 +33,8 @@ export const Profile = () => {
     const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
     const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
 
+    const backendURL = import.meta.env.VITE_LINK;
+
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [tagError, setTagError] = useState('');
@@ -113,7 +115,7 @@ export const Profile = () => {
             const userId = parsedUser.id;
             if (!userId) return;
 
-            const response = await secureFetch(`http://localhost:3002/api/user/${userId}`, 'GET');
+            const response = await secureFetch(`${backendURL}api/user/${userId}`, 'GET');
 
             setUserData(response);
             setFormData({
@@ -138,8 +140,6 @@ export const Profile = () => {
                 email_notifications: response.email_notifications || false,
                 text_notifications: response.text_notifications || false,
             });
-
-            console.log('✅ User data fetched successfully:', response);
 
             setLoading(false); // ✅ Done loading
         } catch (err: any) {
@@ -174,7 +174,7 @@ export const Profile = () => {
 
         try {
             const updates = { my_skills: updatedSkills };
-            await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', updates);
+            await secureFetch(`${backendURL}api/user/${userId}`, 'PUT', updates);
             await getUserDetails();
 
             setFormData(prev => ({
@@ -208,7 +208,7 @@ export const Profile = () => {
 
         try {
             // Update the backend with the new skills array
-            await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', { my_skills: updatedSkills });
+            await secureFetch(`${backendURL}api/user/${userId}`, 'PUT', { my_skills: updatedSkills });
 
             console.log('✅ Skill removed and synced to backend');
         } catch (err: any) {
@@ -258,7 +258,7 @@ export const Profile = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3002/api/user/${userId}`, {
+            const response = await fetch(`${backendURL}api/user/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY!
@@ -309,7 +309,7 @@ export const Profile = () => {
         }));
 
         try {
-            const userData = await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', {
+            const userData = await secureFetch(`${backendURL}api/user/${userId}`, 'PUT', {
                 hide_phone: !formData.hide_phone
             });
         }
@@ -650,7 +650,10 @@ export const Profile = () => {
                                                             {/* Add New Website Form */}
                                                             {isWebsiteModalOpen && (
                                                                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setIsWebsiteModalOpen(false)}>
-                                                                    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
+                                                                    <div
+                                                                        className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative"
+                                                                        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+                                                                    >
 
                                                                         <button
                                                                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -1004,7 +1007,7 @@ export const Profile = () => {
                                     </div>
 
                                     <div className='mt-7'>
-                                        <PriorJobs handleSaveChanges={handleSaveChanges} isEditing={isEditing} isOwner={isOwner} />
+                                        <PriorJobs handleSaveChanges={handleSaveChanges} isEditing={isEditing} isOwner={isOwner} userData={userData} />
                                     </div>
                                 </>
                             )}
