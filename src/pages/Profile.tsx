@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { secureFetch } from '../utils/secureFetch';
-import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Settings, Bell, ChevronRight, Briefcase, FileText, X, Plus, Pencil, Globe, Linkedin, Github, Instagram, Facebook, Dribbble } from 'lucide-react';
 import { LoadingSpinner } from '../components/Loading';
 import { jobSkills } from '../utils/skills';
 import { form } from 'framer-motion/client';
+import { Link } from 'react-router-dom';
+
+import { PriorJobs } from '../components/PriorJobs';
+
+import { States } from '../utils/states';
 
 type FormData = {
     user_image: File | null;
     name: string;
     email: string;
     phone: string;
-    location: string;
     bio: string;
     skills: string[];
     education: string;
@@ -20,33 +24,40 @@ type FormData = {
     city: string;
     state: string;
     hide_phone: boolean;
-    my_portfolio: string;
+    websites: { type: string; url: string; shortName: string }[];
     email_notifications: boolean;
     text_notifications: boolean;
 };
 
 export const Profile = () => {
+    const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
+    const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [tagError, setTagError] = useState('');
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isWebsiteModalOpen, setIsWebsiteModalOpen] = useState(false); // Add a website
+    const [isWebsiteListOpen, setIsWebsiteListOpen] = useState(false); // Website list for user to see their added websites
+    const [isWebsiteListModalOpen, setIsWebsiteListModalOpen] = useState(false); // List of website that are shared on home page
 
     const [activeTab, setActiveTab] = useState<'profile' | 'applications' | 'settings'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [newSkill, setNewSkill] = useState('');
     const [userData, setUserData] = useState<any>(null);
+    const isOwner = userData?.id === loggedInUser?.id;
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+    const [newWebsite, setNewWebsite] = useState({ type: '', url: '', shortName: '' });
     const [loggedIn, setLoggedIn] = useState<boolean>(() => localStorage.getItem('isLoggedIn') === 'true');
     const [formData, setFormData] = useState<FormData>({
         user_image: null,
         name: '',
         email: '',
         phone: '',
-        location: '',
         bio: '',
         skills: [],
         education: '',
@@ -56,7 +67,7 @@ export const Profile = () => {
         city: '',
         state: '',
         hide_phone: false,
-        my_portfolio: '',
+        websites: [],
         email_notifications: false,
         text_notifications: false,
     });
@@ -66,9 +77,14 @@ export const Profile = () => {
         push: false,
     });
 
-    const userId = JSON.parse(localStorage.getItem('user') || '{}')?.id;
-    const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const isOwner = userData?.id === loggedInUser?.id;
+    const websiteIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+        LinkedIn: Linkedin,
+        GitHub: Github,
+        Portfolio: Globe,
+        Instagram: Instagram,
+        Facebook: Facebook,
+        Dribbble: Dribbble,
+    };
 
     const mockApplications = [
         {
@@ -105,7 +121,6 @@ export const Profile = () => {
                 name: `${response.first_name} ${response.last_name}`,
                 email: response.email,
                 phone: response.phone_number || '',
-                location: `${response.city}, ${response.state}`,
                 bio: response.about_me || '',
                 skills: response.my_skills || [],
                 education: response.education?.[0]?.degree || '',
@@ -115,7 +130,11 @@ export const Profile = () => {
                 city: response.city,
                 state: response.state,
                 hide_phone: response.hide_phone || false,
-                my_portfolio: response.my_portfolio || '',
+                websites: Array.isArray(response.websites)
+                    ? response.websites
+                    : typeof response.websites === 'string'
+                        ? JSON.parse(response.websites)
+                        : [],
                 email_notifications: response.email_notifications || false,
                 text_notifications: response.text_notifications || false,
             });
@@ -129,52 +148,13 @@ export const Profile = () => {
         }
     };
 
-    // Fetch user details when component mounts
-    useEffect(() => {
-        getUserDetails();
-    }, []);
-
-    // Handle Images Upload
-    const handleImageUpload = async (file: File) => {
-        const formData = new FormData();
-        formData.append('user_image', file);
-
-        try {
-            const response = await fetch(`http://localhost:3002/api/user/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'x-api-key': import.meta.env.VITE_ENCRYPTION_KEY!
-                    // ❌ Do NOT set Content-Type manually here or it will break FormData
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const text = await response.text(); // fallback in case it's HTML
-                throw new Error(`Upload failed: ${text}`);
-            }
-
-            const data = await response.json();
-
-            console.log('✅ Image uploaded successfully:', data);
-
-            setFormData(prev => ({
-                ...prev,
-                user_image: data.user_image
-            }));
-
-            setSelectedFile(null);
-        } catch (err: any) {
-            console.error('❌ Image upload error:', err.message);
-            alert(err.message);
-        }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
@@ -195,6 +175,7 @@ export const Profile = () => {
         try {
             const updates = { my_skills: updatedSkills };
             await secureFetch(`http://localhost:3002/api/user/${userId}`, 'PUT', updates);
+            await getUserDetails();
 
             setFormData(prev => ({
                 ...prev,
@@ -267,14 +248,10 @@ export const Profile = () => {
         form.append('city', formData.city);
         form.append('state', formData.state);
         form.append('about_me', formData.bio);
-        form.append('my_portfolio', formData.my_portfolio);
+        form.append('websites', JSON.stringify(formData.websites));
         form.append('hide_phone', formData.hide_phone.toString());
         form.append('email_notifications', formData.email_notifications.toString());
         form.append('text_notifications', formData.text_notifications.toString());
-
-        formData.skills.forEach((skill, index) => {
-            form.append(`my_skills[${index}]`, skill);
-        });
 
         if (selectedFile) {
             form.append('user_image', selectedFile);
@@ -294,13 +271,22 @@ export const Profile = () => {
             if (!response.ok) {
                 const errorText = contentType?.includes('application/json')
                     ? await response.json()
-                    : await response.text(); // fallback for HTML error pages
-                throw new Error(errorText.message || errorText || 'Update failed');
+                    : await response.text();
+
+                // ✅ If backend returns "No changes", treat it like success
+                const errorMessage = errorText.message || errorText;
+                if (errorMessage.includes('No Changes Found')) {
+                    setIsEditing(false);
+                    return;
+                }
+
+                throw new Error(errorMessage || 'Update failed');
             }
 
             const result = await response.json();
 
-            setFormData(prev => ({ ...prev, user_image: result.user_image }));
+            await getUserDetails(); // Refresh user data
+
             setSelectedFile(null);
             setIsEditing(false);
         } catch (err: any) {
@@ -347,6 +333,11 @@ export const Profile = () => {
             setIsEditing(true);
         }
     };
+
+    // Fetch user details when component mounts
+    useEffect(() => {
+        getUserDetails();
+    }, []);
 
     useEffect(() => {
         if (newSkill.trim() === '') {
@@ -425,115 +416,114 @@ export const Profile = () => {
                         <div className="flex-1">
 
                             {activeTab === 'profile' && (
-                                <div className="bg-transparent rounded-2xl shadow-lg">
-                                    <div className="relative h-32 bg-gradient-to-r from-indigo-500 to-purple-500">
-                                        <div className="absolute -bottom-16 left-6">
-                                            <div className="bg-white rounded-2xl shadow-lg">
-                                                <div className="relative h-32 w-32 overflow-hidden">
-                                                    {formData.user_image ? (
-                                                        <img
-                                                            src={`http://localhost:3002${formData.user_image}`}
-                                                            alt="Profile"
-                                                            className="absolute inset-0 rounded-[15px] w-full h-full object-cover "
+                                <>
+                                    <div className="bg-transparent rounded-2xl shadow-lg">
+
+                                        <div className="relative h-32 bg-gradient-to-r from-indigo-500 to-purple-500">
+                                            <div className="absolute -bottom-16 left-6">
+                                                <div className="bg-white rounded-2xl shadow-lg">
+                                                    <div className="relative h-32 w-32 overflow-hidden">
+                                                        {formData.user_image ? (
+                                                            <img
+                                                                src={`http://localhost:3002${formData.user_image}`}
+                                                                alt="Profile"
+                                                                className="absolute inset-0 rounded-[15px] w-full h-full object-cover "
+                                                            />
+                                                        ) : (
+                                                            <User className="w-full h-full text-indigo-600" />
+                                                        )}
+
+                                                        {isOwner && isEditing && (
+                                                            <>
+                                                                <input
+                                                                    id="profile-image-upload"
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    onChange={(e) => {
+                                                                        const file = e.target.files?.[0];
+                                                                        if (file) {
+                                                                            setFormData(prev => ({
+                                                                                ...prev,
+                                                                                user_image: file,
+                                                                            }));
+                                                                            setSelectedFile(file);
+                                                                        }
+                                                                    }}
+                                                                    className="hidden"
+                                                                />
+
+                                                                <label
+                                                                    htmlFor="profile-image-upload"
+                                                                    className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-sm font-medium rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                                                                >
+                                                                    Change Image
+                                                                </label>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-20 px-6 pb-6">
+
+                                            <div className="flex justify-between items-center mb-6">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-gray-900">{formData.name}</h2>
+                                                    <p className="text-gray-600">{formData.education}</p>
+                                                </div>
+                                                {isOwner ? (
+                                                    <div className='flex gap-2'>
+                                                        {isEditing && (
+                                                            <button
+                                                                onClick={() => setIsEditing(false)}
+                                                                className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={handleClick}
+                                                            className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
+                                                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                                : 'text-indigo-600 hover:bg-indigo-50'
+                                                                }`}
+                                                        >
+                                                            {isEditing ? 'Save Changes' : <Pencil />}
+                                                        </button>
+                                                    </div>
+                                                ) :
+                                                    <button
+                                                        onClick={() => setActiveTab('settings')}
+                                                        className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+                                                    >
+                                                        Message
+                                                    </button>
+                                                }
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                                {/* Email Section */}
+                                                <div>
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="email"
+                                                            name="email"
+                                                            value={formData.email}
+                                                            onChange={handleInputChange}
+                                                            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
                                                         />
                                                     ) : (
-                                                        <User className="w-full h-full text-indigo-600" />
-                                                    )}
-
-                                                    {isOwner && isEditing && (
-                                                        <>
-                                                            <input
-                                                                id="profile-image-upload"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(e) => {
-                                                                    const file = e.target.files?.[0];
-                                                                    if (file) {
-                                                                        setFormData(prev => ({
-                                                                            ...prev,
-                                                                            user_image: file,
-                                                                        }));
-                                                                        setSelectedFile(file);
-                                                                    }
-                                                                }}
-                                                                className="hidden"
-                                                            />
-
-                                                            <label
-                                                                htmlFor="profile-image-upload"
-                                                                className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-sm font-medium rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-                                                            >
-                                                                Change Image
-                                                            </label>
-                                                        </>
+                                                        <div className="flex items-center text-gray-900">
+                                                            <Mail className="h-5 w-5 text-gray-400 mr-2" />
+                                                            <p>{formData.email}</p>
+                                                        </div>
                                                     )}
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="pt-20 px-6 pb-6">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-gray-900">{formData.name}</h2>
-                                                <p className="text-gray-600">{formData.education}</p>
-                                            </div>
-                                            {isOwner ? (
-                                                <div className='flex gap-2'>
-                                                    {isEditing && (
-                                                        <button
-                                                            onClick={() => setIsEditing(false)}
-                                                            className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={handleClick}
-                                                        className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditing
-                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                            : 'text-indigo-600 hover:bg-indigo-50'
-                                                            }`}
-                                                    >
-                                                        {isEditing ? 'Save Changes' : 'Edit Profile'}
-                                                    </button>
-                                                </div>
-                                            ) :
-                                                <button
-                                                    onClick={() => setActiveTab('settings')}
-                                                    className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
-                                                >
-                                                    Message
-                                                </button>
-                                            }
-                                        </div>
-
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                            {/* Email Section */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                                {isEditing ? (
-                                                    <input
-                                                        type="email"
-                                                        name="email"
-                                                        value={formData.email}
-                                                        onChange={handleInputChange}
-                                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                                    />
-                                                ) : (
-                                                    <div className="flex items-center text-gray-900">
-                                                        <Mail className="h-5 w-5 text-gray-400 mr-2" />
-                                                        <p>{formData.email}</p>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Phone Section */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                                                <div className="flex items-center text-gray-900">
+                                                {/* Phone Section */}
+                                                <div>
                                                     {isEditing ? (
                                                         <input
                                                             type="tel"
@@ -545,261 +535,478 @@ export const Profile = () => {
                                                     ) : (
                                                         <div className="flex items-center text-gray-900">
                                                             <Phone className="h-5 w-5 text-gray-400 mr-2" />
-                                                            {
-                                                                formData.hide_phone
-                                                                    ? <p>(***) ***-****</p>
-                                                                    : <p>{formData.phone}</p>
-
-                                                            }
-
+                                                            <p>{formData.hide_phone ? '(***) ***-****' : formData.phone}</p>
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
 
-                                            {/* Location Section */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                                                <div className="flex items-center text-gray-900">
+                                                {/* Location Section */}
+                                                <div>
                                                     {isEditing ? (
-                                                        <input
-                                                            type="text"
-                                                            name="location"
-                                                            value={formData.location}
-                                                            onChange={handleInputChange}
-                                                            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                                        />
+                                                        <div className='flex flex-row'>
+                                                            <input
+                                                                type="text"
+                                                                name="location"
+                                                                value={formData.city}
+                                                                onChange={handleInputChange}
+                                                                placeholder="City"
+                                                                className="block w-full px-3 py-2 h-[45px] border border-gray-300 rounded-md mb-2"
+                                                            />
+                                                            <select
+                                                                name="state"
+                                                                value={formData.state}
+                                                                onChange={handleInputChange}
+                                                                className="block w-[150px] ml-5 px-3 py-2 h-[45px] border border-gray-300 rounded-md"
+                                                            >
+                                                                <option value="">Select a state</option>
+                                                                {States.map((state) => (
+                                                                    <option key={state.abbreviation} value={state.abbreviation}>
+                                                                        {state.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
                                                     ) : (
                                                         <div className="flex items-center text-gray-900">
                                                             <MapPin className="h-5 w-5 text-gray-400 mr-2" />
-                                                            <p>{formData.location}</p>
+                                                            <p>{formData.city}, {formData.state}</p>
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
 
-                                            {/* Bio Section */}
-                                            <div className="md:col-span-2">
-                                                <div className='flex justify-between'>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                                                    <p className="text-sm text-gray-500 text-right">
-                                                        {formData.bio.length}/500 characters
-                                                    </p>
-                                                </div>
-                                                {isEditing ? (
-                                                    <textarea
-                                                        name="bio"
-                                                        value={formData.bio}
-                                                        onChange={handleInputChange}
-                                                        rows={4}
-                                                        maxLength={500}
-                                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                                    />
-                                                ) : (
-                                                    <p className="text-gray-900">{formData.bio}</p>
-                                                )}
-                                            </div>
+                                                {/* Website Section */}
+                                                <div>
+                                                    {isEditing ? (
+                                                        <div className="md:col-span-2 space-y-0">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsWebsiteListOpen(true)}
+                                                                className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                                                            >
+                                                                View Added Websites
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsWebsiteModalOpen(true)}
+                                                                className="mt-4 ml-4 px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                                            >
+                                                                Add Website
+                                                            </button>
 
-                                            {/* Skills Section */}
-                                            {/* Only show in edit mode if there are skills to display */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {formData.skills.map((skill, index) => (
-                                                        <span
-                                                            key={index}
-                                                            className="inline-flex items-center bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm"
-                                                        >
-                                                            {skill}
-                                                            {isEditing && (
-                                                                <button
-                                                                    onClick={() => handleRemoveSkill(skill)}
-                                                                    className="ml-2 text-indigo-600 hover:text-indigo-800"
-                                                                >
-                                                                    <X className="h-4 w-4" />
-                                                                </button>
-                                                            )}
-                                                        </span>
-                                                    ))}
-                                                    {isEditing && (
-                                                        <>
-                                                            <div className="w-full relative overflow-visible z-10">
+                                                            {/* Website List */}
+                                                            {isWebsiteListOpen && (
+                                                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setIsWebsiteListOpen(false)}>
+                                                                    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
+                                                                        <button
+                                                                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                                                                            onClick={() => setIsWebsiteListOpen(false)}
+                                                                        >
+                                                                            <X className="h-6 w-6" />
+                                                                        </button>
 
-                                                                {/* Add Skill Section */}
-                                                                <form onSubmit={handleAddSkill} className="flex">
-                                                                    <div className="relative w-full">
+                                                                        <h3 className="text-xl font-semibold mb-4">Your Websites</h3>
 
-                                                                        {/* Skills Input */}
-                                                                        <input
-                                                                            type="text"
-                                                                            value={newSkill}
-                                                                            onChange={(e) => {
-                                                                                const input = e.target.value;
-                                                                                setNewSkill(input);
-
-                                                                                if (input.length > 0) {
-                                                                                    const matches = jobSkills
-                                                                                        .filter(skill =>
-                                                                                            skill.toLowerCase().startsWith(input.toLowerCase())
-                                                                                        )
-                                                                                        .slice(0, 5);
-                                                                                    setSuggestions(matches);
-                                                                                } else {
-                                                                                    setSuggestions([]);
-                                                                                }
-                                                                            }}
-                                                                            onKeyDown={(e) => {
-                                                                                if (e.key === 'ArrowDown') {
-                                                                                    e.preventDefault();
-                                                                                    setActiveSuggestionIndex(prev => {
-                                                                                        const next = prev < suggestions.length - 1 ? prev + 1 : 0;
-                                                                                        setNewSkill(suggestions[next] || '');
-                                                                                        return next;
-                                                                                    });
-                                                                                } else if (e.key === 'ArrowUp') {
-                                                                                    e.preventDefault();
-                                                                                    setActiveSuggestionIndex(prev => {
-                                                                                        const next = prev > 0 ? prev - 1 : suggestions.length - 1;
-                                                                                        setNewSkill(suggestions[next] || '');
-                                                                                        return next;
-                                                                                    });
-                                                                                } else if (e.key === 'Enter') {
-                                                                                    e.preventDefault();
-
-                                                                                    // Use selected suggestion if available, else fall back to user input
-                                                                                    const skillToAdd = activeSuggestionIndex >= 0
-                                                                                        ? suggestions[activeSuggestionIndex]
-                                                                                        : newSkill.trim();
-
-                                                                                    if (skillToAdd) {
-                                                                                        // Set input manually and let handleAddSkill use it
-                                                                                        setNewSkill(skillToAdd);
-
-                                                                                        // Submit the form to trigger handleAddSkill
-                                                                                        const form = e.currentTarget.closest('form');
-                                                                                        if (form) {
-                                                                                            form.requestSubmit();
-                                                                                        }
-                                                                                    }
-
-                                                                                    setSuggestions([]);
-                                                                                    setActiveSuggestionIndex(-1);
-                                                                                } else if (e.key === 'Escape') {
-                                                                                    setSuggestions([]);
-                                                                                    setActiveSuggestionIndex(-1);
-                                                                                }
-                                                                            }}
-                                                                            onFocus={() => {
-                                                                                if (newSkill.trim().length > 0) {
-                                                                                    const matches = jobSkills
-                                                                                        .filter(skill =>
-                                                                                            skill.toLowerCase().startsWith(newSkill.toLowerCase())
-                                                                                        )
-                                                                                        .slice(0, 5);
-                                                                                    setSuggestions(matches);
-                                                                                }
-                                                                            }}
-                                                                            onBlur={() => {
-                                                                                setTimeout(() => {
-                                                                                    setSuggestions([]);
-                                                                                }, 100);
-                                                                            }}
-                                                                            placeholder="Add a skill..."
-                                                                            className="px-3 py-1 border border-gray-300 rounded-l-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
-                                                                        />
-
-                                                                        {/* Suggestions Dropdown */}
-                                                                        {suggestions.length > 0 && (
-                                                                            <ul className="absolute left-0 top-full z-[999] bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-lg max-h-60 overflow-y-auto">
-                                                                                {suggestions.map((suggestion, index) => (
-                                                                                    <li
-                                                                                        key={index}
-                                                                                        onMouseDown={() => {
-                                                                                            setFormData(prev => ({
-                                                                                                ...prev,
-                                                                                                skills: [...prev.skills, suggestion]
-                                                                                            }));
-                                                                                            setNewSkill('');
-                                                                                            setSuggestions([]);
-                                                                                            setActiveSuggestionIndex(-1);
-                                                                                        }}
-                                                                                        className={`px-4 py-2 cursor-pointer text-sm ${index === activeSuggestionIndex
-                                                                                            ? 'bg-indigo-100 text-indigo-800'
-                                                                                            : 'hover:bg-indigo-50'
-                                                                                            }`}
+                                                                        {formData.websites.length === 0 ? (
+                                                                            <p className="text-gray-500">No websites added yet.</p>
+                                                                        ) : (
+                                                                            <div className="space-y-4">
+                                                                                {formData.websites.map((site, idx) => (
+                                                                                    <div
+                                                                                        key={idx}
+                                                                                        className="flex justify-between items-center border-b pb-2"
                                                                                     >
-                                                                                        {suggestion}
-                                                                                    </li>
+                                                                                        <div>
+                                                                                            <p className="text-sm font-semibold text-gray-800">
+                                                                                                {site.type}
+                                                                                            </p>
+                                                                                            <a
+                                                                                                href={site.url}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="text-indigo-600 text-sm hover:underline"
+                                                                                            >
+                                                                                                {site.shortName}
+                                                                                            </a>
+                                                                                        </div>
+                                                                                        <button
+                                                                                            onClick={() =>
+                                                                                                setFormData((prev) => ({
+                                                                                                    ...prev,
+                                                                                                    websites: prev.websites.filter((_, i) => i !== idx),
+                                                                                                }))
+                                                                                            }
+                                                                                            className="text-red-500 text-sm hover:text-red-700"
+                                                                                        >
+                                                                                            Remove
+                                                                                        </button>
+                                                                                    </div>
                                                                                 ))}
-                                                                            </ul>
+                                                                            </div>
                                                                         )}
                                                                     </div>
+                                                                </div>
+                                                            )}
 
-                                                                    <button
-                                                                        type="submit"
-                                                                        className="px-3 py-1 bg-indigo-600 text-white rounded-r-full text-sm hover:bg-indigo-700"
+                                                            {/* Add New Website Form */}
+                                                            {isWebsiteModalOpen && (
+                                                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setIsWebsiteModalOpen(false)}>
+                                                                    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
+
+                                                                        <button
+                                                                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                                                                            onClick={() => setIsWebsiteListOpen(false)}
+                                                                        >
+                                                                            <X className="h-6 w-6" />
+                                                                        </button>
+
+                                                                        <h3 className="text-xl font-semibold mb-4">Add Website</h3>
+                                                                        <div className="space-y-4">
+                                                                            <input
+                                                                                type="text"
+                                                                                placeholder="Type (e.g., LinkedIn)"
+                                                                                value={newWebsite.type}
+                                                                                onChange={(e) => setNewWebsite({ ...newWebsite, type: e.target.value })}
+                                                                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                                                            />
+                                                                            <input
+                                                                                type="url"
+                                                                                placeholder="URL"
+                                                                                value={newWebsite.url}
+                                                                                onChange={(e) => setNewWebsite({ ...newWebsite, url: e.target.value })}
+                                                                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                                                            />
+                                                                            <input
+                                                                                type="text"
+                                                                                placeholder="Short Name"
+                                                                                value={newWebsite.shortName}
+                                                                                onChange={(e) => setNewWebsite({ ...newWebsite, shortName: e.target.value })}
+                                                                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className="mt-6 flex justify-end gap-3">
+                                                                            <button
+                                                                                className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
+                                                                                onClick={() => setIsWebsiteModalOpen(false)}
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                            <button
+                                                                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                                                                onClick={() => {
+                                                                                    if (newWebsite.type && newWebsite.url && newWebsite.shortName) {
+                                                                                        setFormData((prev) => ({
+                                                                                            ...prev,
+                                                                                            websites: [...prev.websites, newWebsite],
+                                                                                        }));
+                                                                                        setNewWebsite({ type: '', url: '', shortName: '' });
+                                                                                        setIsWebsiteModalOpen(false);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                Add Website
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                        </div>
+                                                    ) : (
+                                                        formData.websites.length > 0 && (() => {
+                                                            const firstSite = formData.websites[0];
+                                                            const Icon = websiteIconMap[firstSite.type] || Link;
+                                                            const remainingCount = formData.websites.length - 1;
+
+                                                            return (
+                                                                <div className="flex items-center text-gray-900">
+                                                                    <Icon className="h-5 w-5 text-gray-400 mr-2" />
+                                                                    <a
+                                                                        href={firstSite.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-indigo-600 hover:underline break-words"
                                                                     >
-                                                                        <Plus className="h-4 w-4" />
-                                                                    </button>
+                                                                        {firstSite.shortName}
+                                                                    </a>
+                                                                    {remainingCount > 0 && (
+                                                                        <button
+                                                                            onClick={() => setIsWebsiteListModalOpen(true)}
+                                                                            className="ml-2 text-gray-600 hover:underline text-sm underline"
+                                                                        >
+                                                                            and {remainingCount} more
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()
+                                                    )}
+                                                </div>
 
-                                                                </form>
-
-                                                                {errorMessage && (
-                                                                    <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
-                                                                )}
+                                                {isWebsiteListModalOpen && (
+                                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                                                        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
+                                                            <div className="flex justify-between items-center mb-4">
+                                                                <h3 className="text-xl font-semibold">Other Websites</h3>
+                                                                <button
+                                                                    onClick={() => setIsWebsiteListModalOpen(false)}
+                                                                    className="text-gray-500 hover:text-gray-700 text-sm"
+                                                                >
+                                                                    Close
+                                                                </button>
                                                             </div>
 
-                                                            {/* Tags Section */}
-                                                            {/* Only show in edit mode */}
-                                                            <div className="md:col-span-2 mt-4">
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-                                                                <div className="flex flex-wrap gap-2 mt-4">
-                                                                    {tags.map((tag, idx) => (
-                                                                        <span
-                                                                            key={idx}
-                                                                            className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm flex items-center"
-                                                                        >
-                                                                            {tag}
-                                                                            <button
-                                                                                onClick={() => handleRemoveTag(tag)}
-                                                                                className="ml-2 text-indigo-600 hover:text-indigo-800"
+                                                            <div className="space-y-4">
+                                                                {formData.websites.slice(1).map((site, idx) => {
+                                                                    const Icon = websiteIconMap[site.type] || Link;
+                                                                    return (
+                                                                        <div key={idx} className="flex items-center">
+                                                                            <Icon className="h-5 w-5 text-gray-400 mr-2" />
+                                                                            <a
+                                                                                href={site.url}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="text-indigo-600 hover:underline break-words"
                                                                             >
-                                                                                <X className="w-4 h-4" />
-                                                                            </button>
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
+                                                                                {site.shortName}
+                                                                            </a>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
 
-                                                                {/* Tag Input */}
-                                                                <form onSubmit={handleAddTag}>
-                                                                    <div className="flex gap-2">
-                                                                        <input
-                                                                            type="text"
-                                                                            value={tagInput}
-                                                                            onChange={(e) => {
-                                                                                setTagInput(e.target.value);
-                                                                                if (e.target.value.trim() === '') setTagError('');
-                                                                            }}
-                                                                            placeholder="Add a tag..."
-                                                                            className="flex-1 px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                                                        />
+                                                {/* Bio Section */}
+                                                <div className="md:col-span-2">
+                                                    <div className='flex justify-between'>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                                        {isEditing && (
+                                                            <p className="text-sm text-gray-500 text-right">
+                                                                {formData.bio.length}/500 characters
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    {isEditing ? (
+                                                        <textarea
+                                                            name="bio"
+                                                            value={formData.bio}
+                                                            onChange={handleInputChange}
+                                                            rows={4}
+                                                            maxLength={500}
+                                                            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                                        />
+                                                    ) : (
+                                                        <p className="text-gray-900">{formData.bio}</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Skills Section */}
+                                                {/* Only show in edit mode if there are skills to display */}
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {formData.skills.map((skill, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className="inline-flex items-center bg-indigo-50 text-indigo-700 px-3 py-2 rounded-full text-sm"
+                                                            >
+                                                                {skill}
+                                                                {isEditing && (
+                                                                    <button
+                                                                        onClick={() => handleRemoveSkill(skill)}
+                                                                        className="ml-2 text-indigo-600 hover:text-indigo-800"
+                                                                    >
+                                                                        <X className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
+                                                            </span>
+                                                        ))}
+                                                        {isEditing && (
+                                                            <>
+                                                                <div className="w-full relative overflow-visible z-10">
+
+                                                                    {/* Add Skill Section */}
+                                                                    <form onSubmit={handleAddSkill} className="flex">
+                                                                        <div className="relative w-full">
+
+                                                                            {/* Skills Input */}
+                                                                            <input
+                                                                                type="text"
+                                                                                value={newSkill}
+                                                                                onChange={(e) => {
+                                                                                    const input = e.target.value;
+                                                                                    setNewSkill(input);
+
+                                                                                    if (input.length > 0) {
+                                                                                        const matches = jobSkills
+                                                                                            .filter(skill =>
+                                                                                                skill.toLowerCase().startsWith(input.toLowerCase())
+                                                                                            )
+                                                                                            .slice(0, 5);
+                                                                                        setSuggestions(matches);
+                                                                                    } else {
+                                                                                        setSuggestions([]);
+                                                                                    }
+                                                                                }}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'ArrowDown') {
+                                                                                        e.preventDefault();
+                                                                                        setActiveSuggestionIndex(prev => {
+                                                                                            const next = prev < suggestions.length - 1 ? prev + 1 : 0;
+                                                                                            setNewSkill(suggestions[next] || '');
+                                                                                            return next;
+                                                                                        });
+                                                                                    } else if (e.key === 'ArrowUp') {
+                                                                                        e.preventDefault();
+                                                                                        setActiveSuggestionIndex(prev => {
+                                                                                            const next = prev > 0 ? prev - 1 : suggestions.length - 1;
+                                                                                            setNewSkill(suggestions[next] || '');
+                                                                                            return next;
+                                                                                        });
+                                                                                    } else if (e.key === 'Enter') {
+                                                                                        e.preventDefault();
+
+                                                                                        // Use selected suggestion if available, else fall back to user input
+                                                                                        const skillToAdd = activeSuggestionIndex >= 0
+                                                                                            ? suggestions[activeSuggestionIndex]
+                                                                                            : newSkill.trim();
+
+                                                                                        if (skillToAdd) {
+                                                                                            // Set input manually and let handleAddSkill use it
+                                                                                            setNewSkill(skillToAdd);
+
+                                                                                            // Submit the form to trigger handleAddSkill
+                                                                                            const form = e.currentTarget.closest('form');
+                                                                                            if (form) {
+                                                                                                form.requestSubmit();
+                                                                                            }
+                                                                                        }
+
+                                                                                        setSuggestions([]);
+                                                                                        setActiveSuggestionIndex(-1);
+                                                                                    } else if (e.key === 'Escape') {
+                                                                                        setSuggestions([]);
+                                                                                        setActiveSuggestionIndex(-1);
+                                                                                    }
+                                                                                }}
+                                                                                onFocus={() => {
+                                                                                    if (newSkill.trim().length > 0) {
+                                                                                        const matches = jobSkills
+                                                                                            .filter(skill =>
+                                                                                                skill.toLowerCase().startsWith(newSkill.toLowerCase())
+                                                                                            )
+                                                                                            .slice(0, 5);
+                                                                                        setSuggestions(matches);
+                                                                                    }
+                                                                                }}
+                                                                                onBlur={() => {
+                                                                                    setTimeout(() => {
+                                                                                        setSuggestions([]);
+                                                                                    }, 100);
+                                                                                }}
+                                                                                placeholder="Add a skill..."
+                                                                                className="px-3 py-4 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+                                                                            />
+
+                                                                            {/* Suggestions Dropdown */}
+                                                                            {suggestions.length > 0 && (
+                                                                                <ul className="absolute left-0 top-full z-[999] bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-lg max-h-60 overflow-y-auto">
+                                                                                    {suggestions.map((suggestion, index) => (
+                                                                                        <li
+                                                                                            key={index}
+                                                                                            onMouseDown={() => {
+                                                                                                setFormData(prev => ({
+                                                                                                    ...prev,
+                                                                                                    skills: [...prev.skills, suggestion]
+                                                                                                }));
+                                                                                                setNewSkill('');
+                                                                                                setSuggestions([]);
+                                                                                                setActiveSuggestionIndex(-1);
+                                                                                            }}
+                                                                                            className={`px-4 py-2 cursor-pointer text-sm ${index === activeSuggestionIndex
+                                                                                                ? 'bg-indigo-100 text-indigo-800'
+                                                                                                : 'hover:bg-indigo-50'
+                                                                                                }`}
+                                                                                        >
+                                                                                            {suggestion}
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            )}
+                                                                        </div>
+
                                                                         <button
                                                                             type="submit"
-                                                                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                                            className="px-3 py-1 ml-5 bg-indigo-600 text-white rounded-md w-[100px] text-sm hover:bg-indigo-700"
                                                                         >
-                                                                            Add
+                                                                            <Plus className="h-6 w-6 ml-5" />
                                                                         </button>
+
+                                                                    </form>
+
+                                                                    {errorMessage && (
+                                                                        <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Tags Section */}
+                                                                {/* Only show in edit mode */}
+                                                                <div className="md:col-span-2 mt-4">
+                                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                                                    <div className="flex flex-wrap gap-2 mt-4">
+                                                                        {tags.map((tag, idx) => (
+                                                                            <span
+                                                                                key={idx}
+                                                                                className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm flex items-center"
+                                                                            >
+                                                                                {tag}
+                                                                                <button
+                                                                                    onClick={() => handleRemoveTag(tag)}
+                                                                                    className="ml-2 text-indigo-600 hover:text-indigo-800"
+                                                                                >
+                                                                                    <X className="w-4 h-4" />
+                                                                                </button>
+                                                                            </span>
+                                                                        ))}
                                                                     </div>
-                                                                    {tagError && <p className="text-red-500 mt-1 text-sm">{tagError}</p>}
-                                                                </form>
-                                                            </div>
-                                                        </>
-                                                    )}
+
+                                                                    {/* Tag Input */}
+                                                                    <form onSubmit={handleAddTag}>
+                                                                        <div className="flex gap-2">
+                                                                            <input
+                                                                                type="text"
+                                                                                value={tagInput}
+                                                                                onChange={(e) => {
+                                                                                    setTagInput(e.target.value);
+                                                                                    if (e.target.value.trim() === '') setTagError('');
+                                                                                }}
+                                                                                placeholder="Add a tag..."
+                                                                                className="flex-1 px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                                                            />
+                                                                            <button
+                                                                                type="submit"
+                                                                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                                            >
+                                                                                Add
+                                                                            </button>
+                                                                        </div>
+                                                                        {tagError && <p className="text-red-500 mt-1 text-sm">{tagError}</p>}
+                                                                    </form>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+
+                                    <div className='mt-7'>
+                                        <PriorJobs handleSaveChanges={handleSaveChanges} isEditing={isEditing} isOwner={isOwner} />
+                                    </div>
+                                </>
                             )}
 
                             {activeTab === 'applications' && (
