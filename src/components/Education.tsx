@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 type EducationProps = {
     handleSaveChanges: () => void;
-    UserData: any;
+    userData: any;
 };
 
 type EducationDetails = {
@@ -13,7 +13,7 @@ type EducationDetails = {
     stillStudying: boolean;
 };
 
-export const Education: React.FC<EducationProps> = ({ handleSaveChanges, UserData }) => {
+export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userData }) => {
 
     return (
         <div className="bg-white shadow-md rounded-lg p-4 min-h-[250px] relative">
