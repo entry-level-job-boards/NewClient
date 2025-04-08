@@ -19,7 +19,7 @@ type FormData = {
     phone: string;
     bio: string;
     skills: string[];
-    education: string;
+    education: string[];
     day: string;
     month: string;
     year: string;
@@ -64,7 +64,7 @@ export const Profile = () => {
         phone: '',
         bio: '',
         skills: [],
-        education: '',
+        education: [],
         day: '',
         month: '',
         year: '',
@@ -253,6 +253,7 @@ export const Profile = () => {
         form.append('city', formData.city);
         form.append('state', formData.state);
         form.append('about_me', formData.bio);
+        form.append('education', JSON.stringify(formData.education));
         form.append('websites', JSON.stringify(formData.websites));
         form.append('hide_phone', formData.hide_phone.toString());
         form.append('email_notifications', formData.email_notifications.toString());
@@ -1016,7 +1017,7 @@ export const Profile = () => {
                                     </div>
 
                                     <div className='mt-7'>
-                                        <Education handleSaveChanges={handleSaveChanges} userData={userData} />
+                                        <Education handleSaveChanges={handleSaveChanges} userData={userData} isOwner={isOwner} />
                                     </div>
                                 </>
                             )}

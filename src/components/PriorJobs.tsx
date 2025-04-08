@@ -120,14 +120,49 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
         <div className="bg-white shadow-md rounded-lg p-4 min-h-[250px] relative">
             <div className='flex justify-between items-center'>
                 <h2 className="text-lg font-semibold mb-4">Work History</h2>
-                <button className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditingJobs
+                {/* <button className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditingJobs
                     ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                     : 'text-indigo-600 hover:bg-indigo-50'
                     }`}
                     onClick={() => setIsEditingJobs(!isEditingJobs)}
                 >
-                    {isEditingJobs ? 'Save Changes' : <Pencil />}
-                </button>
+                    {isOwner && (
+                        isEditingJobs ? 'Save Changes' : <Pencil />
+                    )}
+                </button> */}
+                {isOwner && (
+                    <div className="flex gap-2">
+                        {isEditingJobs && (
+                            <>
+                                <button
+                                    className="px-4 py-2 rounded-xl bg-white border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-shadow shadow-md"
+                                    onClick={() => setEditingJobIndex(-1)}
+                                >
+                                    <Pen className="h-5 w-5 mr-2 inline" />
+                                    +
+                                </button>
+                                <button
+                                    onClick={() => setIsEditingJobs(false)}
+                                    className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700"
+                                >
+                                    Cancel
+                                </button>
+                            </>
+                        )}
+                        <button
+                            className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditingJobs
+                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                : 'text-indigo-600 hover:bg-indigo-50'
+                                }`}
+                            onClick={() => {
+                                if (isEditingJobs) handleSave();
+                                setIsEditingJobs(!isEditingJobs);
+                            }}
+                        >
+                            {isEditingJobs ? 'Save Changes' : <Pencil />}
+                        </button>
+                    </div>
+                )}
             </div>
             <ul className="list-disc pl-5 list-none mt-2">
                 {priorJobs.length > 0 ? (
@@ -171,19 +206,6 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
                     </>
                 )}
             </ul>
-
-            {isEditingJobs && (
-                <button
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                        mt-4 flex items-center text-indigo-600 hover:text-indigo-800 
-                        transition-colors bg-white border border-indigo-600 
-                        rounded-xl px-4 py-2 shadow-md hover:shadow-lg"
-                    onClick={() => setEditingJobIndex(-1)}
-                >
-                    <Pen className="h-5 w-5 mr-2" />
-                    Add New Job
-                </button>
-            )}
 
             {editingJobIndex !== null && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
