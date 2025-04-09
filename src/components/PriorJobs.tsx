@@ -34,12 +34,6 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
         bullet_points: [''],
     });
 
-    useEffect(() => {
-        if (userData && Array.isArray(userData.prior_jobs)) {
-            setPriorJobs(userData.prior_jobs);
-        }
-    }, [userData]);
-
     const handleJobChange = (index: number, field: keyof PriorJob, value: any) => {
         const jobsCopy = [...priorJobs];
         jobsCopy[index] = { ...jobsCopy[index], [field]: value };
@@ -110,6 +104,12 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
     };
 
     useEffect(() => {
+        if (userData && Array.isArray(userData.prior_jobs)) {
+            setPriorJobs(userData.prior_jobs);
+        }
+    }, [userData]);
+
+    useEffect(() => {
         if (editingJobIndex !== null && editingJobIndex !== -1) {
             const jobToEdit = priorJobs[editingJobIndex];
             setNewJob(jobToEdit);
@@ -119,17 +119,7 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
     return (
         <div className="bg-white shadow-md rounded-lg p-4 min-h-[250px] relative">
             <div className='flex justify-between items-center'>
-                <h2 className="text-lg font-semibold mb-4">Work History</h2>
-                {/* <button className={`px-4 py-2 rounded-xl transition-all duration-200 ${isEditingJobs
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    : 'text-indigo-600 hover:bg-indigo-50'
-                    }`}
-                    onClick={() => setIsEditingJobs(!isEditingJobs)}
-                >
-                    {isOwner && (
-                        isEditingJobs ? 'Save Changes' : <Pencil />
-                    )}
-                </button> */}
+                <h2 className="text-lg font-semibold ml-1">Work History</h2>
                 {isOwner && (
                     <div className="flex gap-2">
                         {isEditingJobs && (
@@ -164,7 +154,7 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
                     </div>
                 )}
             </div>
-            <ul className="list-disc pl-5 list-none mt-2">
+            <ul className="list-disc list-none mt-2">
                 {priorJobs.length > 0 ? (
                     priorJobs.map((job, index) => (
                         <li key={index} className="mb-6 bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow ">
@@ -190,12 +180,14 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
 
                             {job.bullet_points.length > 0 && (
                                 <ul className="mt-4 space-y-1 text-sm text-gray-700 list-disc list-inside">
-                                    {job.bullet_points.map((point, i) => (
-                                        <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                                            <Sparkles className="h-4 w-4 text-indigo-600 mt-0.5" />
-                                            <p>{point}</p>
-                                        </div>
-                                    ))}
+                                    {job.bullet_points
+                                        .filter(point => point.trim() !== '')
+                                        .map((point, i) => (
+                                            <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                                                <Sparkles className="h-4 w-4 text-indigo-600 mt-0.5" />
+                                                <p>{point}</p>
+                                            </div>
+                                        ))}
                                 </ul>
                             )}
                         </li>
@@ -208,7 +200,7 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
             </ul>
 
             {editingJobIndex !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setEditingJobIndex(null)}>
                     <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl relative">
                         <button
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -221,7 +213,7 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
                             {editingJobIndex === -1 ? 'Add Job' : 'Edit Job'}
                         </h2>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
                             {(editingJobIndex === -1 ? (
                                 <>
                                     <input
@@ -356,33 +348,36 @@ export const PriorJobs: React.FC<priorJobsProps> = ({ handleSaveChanges, isEditi
                                         />
                                     ))}
 
+
+
                                     <button
                                         className="text-sm text-indigo-600 mt-2 hover:underline"
                                         onClick={() => addBulletPoint(editingJobIndex)}
                                     >
                                         + Add Bullet Point
                                     </button>
+
                                 </>
                             ))}
+                        </div>
 
-                            <div className="flex justify-end gap-3 pt-4">
-                                <button
-                                    className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
-                                    onClick={() => setEditingJobIndex(null)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                                    onClick={handleSave}
-                                >
-                                    Save
-                                </button>
-                            </div>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button
+                                className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
+                                onClick={() => setEditingJobIndex(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                onClick={handleSave}
+                            >
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </div >
     );
 };
