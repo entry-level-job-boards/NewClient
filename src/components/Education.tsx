@@ -269,32 +269,32 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                     {addingEducation ? "Adding Education" : "Updating Education"}
                                 </h1>
                                 <div className='flex flex-col gap-4 mt-4'>
-                                    <label className='ml-5 text-base font-bold'>University</label>
+                                    <label className="text-sm font-medium text-gray-700 ml-5 mt-2">University</label>
                                     <input
                                         type="text"
                                         placeholder="Institution"
                                         value={education.institution}
                                         onChange={(e) => handleInputChange(index, 'institution', e.target.value)}
                                         disabled={!isEditingEducation}
-                                        className='w-[95%] h-[40px] border border-gray-300 rounded-lg px-4 mx-auto'
+                                        className="w-[95%] mx-auto h-[44px] border border-gray-300 rounded-md px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     />
 
-                                    <label className='ml-5 text-base font-bold'>Degree</label>
+                                    <label className="text-sm font-medium text-gray-700 ml-5 mt-2">Degree</label>
                                     <input
                                         type="text"
                                         placeholder="Degree"
                                         value={education.degree}
                                         onChange={(e) => handleInputChange(index, 'degree', e.target.value)}
                                         disabled={!isEditingEducation}
-                                        className='w-[95%] h-[40px] border border-gray-300 rounded-lg px-4 mx-auto'
+                                        className="w-[95%] mx-auto h-[44px] border border-gray-300 rounded-md px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     />
 
-                                    <label className='ml-5 text-base font-bold'>Degree Type</label>
+                                    <label className="text-sm font-medium text-gray-700 ml-5 mt-2">Degree Type</label>
                                     <select
                                         value={education.degree_type}
                                         onChange={(e) => handleInputChange(index, 'degree_type', e.target.value)}
                                         disabled={!isEditingEducation}
-                                        className='w-[95%] h-[40px] border border-gray-300 rounded-lg px-4 mx-auto'
+                                        className="w-[95%] mx-auto h-[44px] border border-gray-300 rounded-md px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     >
                                         <option value="">Degree Type</option>
                                         <option value="Bachelor's">Bachelor's</option>
@@ -306,8 +306,8 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                     </select>
 
                                     <div className='flex flex-row gap-4 w-[95%] mx-auto'>
-                                        <label className='text-base font-bold w-[49%]'>Start Date</label>
-                                        <label className='text-base font-bold'>End Date</label>
+                                        <label className='text-sm font-medium text-gray-700 w-[49%]'>Start Date</label>
+                                        <label className='text-sm font-medium text-gray-700'>End Date</label>
                                     </div>
 
                                     <div className='flex flex-row gap-4 justify-between w-[95%] mx-auto'>
@@ -317,7 +317,7 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                                 value={education.startMonth}
                                                 onChange={(e) => handleInputChange(index, 'startMonth', e.target.value)}
                                                 disabled={!isEditingEducation}
-                                                className='w-1/2 h-[40px] border border-gray-300 rounded-lg px-2'
+                                                className='w-1/2 h-[40px] border border-gray-300 rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-indigo-500'
                                             >
                                                 <option value="">Month</option>
                                                 {Array.from({ length: 12 }, (_, i) => (
@@ -331,7 +331,7 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                                 value={education.startYear}
                                                 onChange={(e) => handleInputChange(index, 'startYear', e.target.value)}
                                                 disabled={!isEditingEducation}
-                                                className="w-1/2 h-[40px] border border-gray-300 rounded-lg px-2"
+                                                className="w-1/2 h-[40px] border border-gray-300 rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             >
                                                 <option value="">Year</option>
                                                 {Array.from({ length: 100 }, (_, i) => {
@@ -347,7 +347,7 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                                 value={education.endMonth}
                                                 onChange={(e) => handleInputChange(index, 'endMonth', e.target.value)}
                                                 disabled={!isEditingEducation || education.stillStudying}
-                                                className='w-1/2 h-[40px] border border-gray-300 rounded-lg px-2'
+                                                className='w-1/2 h-[40px] border border-gray-300 rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-indigo-500'
                                             >
                                                 <option value="">Month</option>
                                                 {Array.from({ length: 12 }, (_, i) => (
@@ -361,7 +361,7 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                                 value={education.endYear}
                                                 onChange={(e) => handleInputChange(index, 'endYear', e.target.value)}
                                                 disabled={!isEditingEducation || education.stillStudying}
-                                                className="w-1/2 h-[40px] border border-gray-300 rounded-lg px-2"
+                                                className="w-1/2 h-[40px] border border-gray-300 rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             >
                                                 <option value="">Year</option>
                                                 {Array.from({ length: 100 }, (_, i) => {
@@ -378,9 +378,9 @@ export const Education: React.FC<EducationProps> = ({ handleSaveChanges, userDat
                                             checked={education.stillStudying}
                                             onChange={(e) => handleInputChange(index, 'stillStudying', e.target.checked)}
                                             disabled={!isEditingEducation}
-                                            className='mr-2 h-[20px] w-[20px] border border-gray-300 rounded-lg'
+                                            className='mr-2 h-[20px] w-[20px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
                                         />
-                                        Still Studying
+                                        Currently Enrolled
                                     </label>
                                 </div>
 
